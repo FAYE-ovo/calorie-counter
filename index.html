@@ -203,6 +203,39 @@
   .ctx-menu button:first-child { border-bottom: 1px solid #edf2f7; }
   .toast { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: rgba(45,55,72,0.92); color: #fff; padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 600; z-index: 200; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; }
   .toast.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  /* Exercise section */
+  .exercise-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .exercise-row select { flex: 1; padding: 8px 10px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; color: #2d3748; background: #fff; }
+  .exercise-row select:focus { outline: none; border-color: #ffb74d; }
+  .exercise-row input { width: 70px; padding: 8px 10px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; color: #2d3748; text-align: center; }
+  .exercise-row input:focus { outline: none; border-color: #ffb74d; }
+  .exercise-row .min-label { font-size: 12px; color: #a0aec0; align-self: center; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .bar-icon { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .bar-label { font-size: 12px; color: #a0aec0; width: 36px; }
+  .bar-track { flex: 1; height: 20px; background: #f5f5f5; border-radius: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; transition: width 0.3s; }
+  .bar-fill.intake { background: linear-gradient(90deg, #ffd180, #ffcc80); }
+  .bar-fill.burn { background: linear-gradient(90deg, #ffab91, #ff7043); }
+  .bar-value { font-size: 13px; font-weight: 600; color: #2d3748; width: 72px; text-align: right; }
+  .net-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #edf2f7; }
+  .net-label { font-size: 14px; color: #a0aec0; }
+  .net-value { font-size: 18px; font-weight: 700; color: #2d3748; }
+  .exercise-hint { font-size: 12px; color: #a0aec0; margin-top: 8px; }
+  @keyframes bolt-tremble { 0%,100% { transform: translate(0,0) rotate(0); } 25% { transform: translate(-1.5px,1px) rotate(-4deg); } 50% { transform: translate(1.5px,-1px) rotate(4deg); } 75% { transform: translate(-1px,-1.5px) rotate(-2deg); } }
+  .bolt-tremble { animation: bolt-tremble 0.35s ease-in-out 3; }
+  .pac-body { fill: #ffcc80; }
+  .pac-eye { fill: #5d4037; }
+  .bolt-body { fill: #ff7043; }
+
+  /* Food search */
+  .search-row { display: flex; gap: 6px; margin-bottom: 14px; }
+  .search-input { flex: 1; padding: 8px 14px; font-size: 14px; border: 1.5px solid #ffe0b2; border-radius: 20px; background: #fff8e1; color: #2d3748; }
+  .search-input:focus { outline: none; border-color: #ffb74d; background: #fff; }
+  .search-input::placeholder { color: #cbd5e0; }
+  .no-results { text-align: center; padding: 24px 0; font-size: 14px; color: #a0aec0; }
+  .no-results a { color: #ff9800; font-weight: 600; cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -241,6 +274,41 @@
         <span><span id="t-p-label">蛋白质</span> <b id="pKcal">0</b> kcal</span>
         <span><span id="t-f-label">脂肪</span> <b id="fKcal">0</b> kcal</span>
         <span><span id="t-c-label">碳水</span> <b id="cKcal">0</b> kcal</span>
+      </div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" id="exHeader" onclick="toggleCollapsible('ex')">
+        <span id="t-exercise-title">运动消耗对比</span>
+        <span class="arrow">▸</span>
+      </div>
+      <div class="collapsible-body" id="exBody">
+        <div class="exercise-row">
+          <select id="exerciseType"></select>
+          <input type="number" id="exerciseDuration" value="30" min="1" max="999">
+          <span class="min-label">min</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" id="t-intake-label">摄入</span>
+          <div class="bar-icon" id="pacIcon">
+            <svg width="32" height="32" viewBox="0 0 40 40"><path class="pac-body" id="pacBody" d=""/><circle class="pac-eye" cx="22" cy="13" r="2"/></svg>
+          </div>
+          <div class="bar-track"><div class="bar-fill intake" id="intakeBar" style="width:0%"></div></div>
+          <span class="bar-value" id="intakeBarVal">0 kcal</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" id="t-burn-label">消耗</span>
+          <div class="bar-icon" id="boltIcon">
+            <svg width="32" height="32" viewBox="0 0 24 24"><path class="bolt-body" d="M13 2 L4 14 L11 14 L10 22 L20 9 L13 9 Z"/></svg>
+          </div>
+          <div class="bar-track"><div class="bar-fill burn" id="burnBar" style="width:0%"></div></div>
+          <span class="bar-value" id="burnBarVal">0 kcal</span>
+        </div>
+        <div class="net-row">
+          <span class="net-label" id="t-net-label">净额</span>
+          <span class="net-value" id="netVal">0 kcal</span>
+        </div>
+        <div class="exercise-hint" id="t-exercise-hint"></div>
       </div>
     </div>
 
@@ -409,6 +477,9 @@
       catProtein: '高蛋白', catCarbs: '主食碳水', catVegetable: '蔬菜', catFruit: '水果',
       macroLabel: '每100g · P', gramPlaceholder: '克数',
       add: '添加',
+      exerciseTitle: '运动消耗对比', intakeLabel: '摄入', burnLabel: '消耗', netLabel: '净额',
+      searchPlaceholder: '搜索食物...', noResults: '啊哦，还没有呢，你来添加吧！', goAdd: '去添加',
+      exerciseHint: '💡 设置体重数据后计算更准确',
       ph: { protein: '输入蛋白质含量（克）', fat: '输入脂肪含量（克）', carbs: '输入碳水含量（克）', kj: '输入千焦 (kJ)', kcal: '输入千卡 (kcal)' }
     },
     en: {
@@ -438,12 +509,101 @@
       catProtein: 'Protein', catCarbs: 'Carbs', catVegetable: 'Vegetables', catFruit: 'Fruits',
       macroLabel: 'per 100g · P', gramPlaceholder: 'grams',
       add: 'Add',
+      exerciseTitle: 'Exercise Burn', intakeLabel: 'Intake', burnLabel: 'Burn', netLabel: 'Net',
+      searchPlaceholder: 'Search food...', noResults: 'No matches. Add your own!', goAdd: 'Add',
+      exerciseHint: '💡 Set weight in settings for accurate results',
       ph: { protein: 'Enter protein (g)', fat: 'Enter fat (g)', carbs: 'Enter carbs (g)', kj: 'Enter kJ', kcal: 'Enter kcal' }
     }
   };
 
   var currentLang = 'zh';
   var accumulator = [];
+
+  // ============ Exercise Database ============
+  var EXERCISES = [
+    { zh: '快走', en: 'Brisk Walking', met: 3.5 },
+    { zh: '慢跑(8km/h)', en: 'Jogging (5mph)', met: 8.3 },
+    { zh: '跑步(10km/h)', en: 'Running (6mph)', met: 9.8 },
+    { zh: '骑行(休闲)', en: 'Cycling (leisure)', met: 6.8 },
+    { zh: '游泳', en: 'Swimming', met: 6.0 },
+    { zh: '力量训练', en: 'Weight Training', met: 5.0 },
+    { zh: 'HIIT', en: 'HIIT', met: 8.0 },
+    { zh: '跳绳', en: 'Jump Rope', met: 10.0 },
+    { zh: '瑜伽', en: 'Yoga', met: 3.0 },
+    { zh: '篮球', en: 'Basketball', met: 6.0 },
+    { zh: '羽毛球', en: 'Badminton', met: 5.5 },
+    { zh: '徒步', en: 'Hiking', met: 6.0 },
+    { zh: '划船机', en: 'Rowing', met: 7.0 },
+    { zh: '舞蹈', en: 'Dancing', met: 4.8 },
+    { zh: '拳击训练', en: 'Boxing', met: 7.8 }
+  ];
+
+  function getWeight() {
+    var data = localStorage.getItem('userData');
+    if (data) {
+      try { return JSON.parse(data).weight || 65; }
+      catch(e) { return 65; }
+    }
+    return 65;
+  }
+
+  function getExerciseBurn() {
+    var ex = EXERCISES[parseInt(document.getElementById('exerciseType').value) || 0];
+    var dur = parseFloat(document.getElementById('exerciseDuration').value) || 0;
+    var weight = getWeight();
+    return Math.round(ex.met * weight * (dur / 60));
+  }
+
+  function pacPath(angleDeg) {
+    var angle = Math.min(Math.max(angleDeg, 0), 160);
+    var halfRad = (angle / 2) * Math.PI / 180;
+    var cx = 20, cy = 20, r = 16;
+    if (angle < 5) {
+      return 'M ' + (cx - r) + ',' + cy + ' A ' + r + ',' + r + ' 0 1 0 ' + (cx + r) + ',' + cy + ' A ' + r + ',' + r + ' 0 1 0 ' + (cx - r) + ',' + cy + ' Z';
+    }
+    var tx = cx + r * Math.sin(halfRad);
+    var ty = cy - r * Math.cos(halfRad);
+    var bx = cx + r * Math.sin(halfRad);
+    var by = cy + r * Math.cos(halfRad);
+    return 'M ' + cx + ',' + cy + ' L ' + tx.toFixed(2) + ',' + ty.toFixed(2) + ' A ' + r + ',' + r + ' 0 1 0 ' + bx.toFixed(2) + ',' + by.toFixed(2) + ' Z';
+  }
+
+  function updateExercise() {
+    var intake = parseFloat(document.getElementById('totalKcal').textContent) || 0;
+    var burn = getExerciseBurn();
+    var maxVal = Math.max(intake, burn, 1);
+    var intakePct = (intake / maxVal) * 100;
+    var burnPct = (burn / maxVal) * 100;
+
+    document.getElementById('intakeBar').style.width = intakePct + '%';
+    document.getElementById('intakeBar').textContent = intake > 0 ? Math.round(intake) : '';
+    document.getElementById('intakeBarVal').textContent = Math.round(intake) + ' kcal';
+    document.getElementById('burnBar').style.width = burnPct + '%';
+    document.getElementById('burnBar').textContent = burn > 0 ? burn : '';
+    document.getElementById('burnBarVal').textContent = burn + ' kcal';
+
+    var net = Math.round(intake - burn);
+    var netEl = document.getElementById('netVal');
+    netEl.textContent = (net >= 0 ? '+' : '') + net + ' kcal';
+
+    // Pac-Man: 0 intake = 160° (wide open), max = 0° (closed)
+    var denom = parseFloat(localStorage.getItem('bmr')) || 2000;
+    var ratio = Math.min(intake / denom, 1);
+    var pacAngle = (1 - ratio) * 160;
+    if (pacAngle < 5) pacAngle = 0;
+    document.getElementById('pacBody').setAttribute('d', pacPath(pacAngle));
+
+    // Bolt tremble
+    var bolt = document.getElementById('boltIcon');
+    bolt.classList.remove('bolt-tremble');
+    void bolt.offsetWidth;
+    bolt.classList.add('bolt-tremble');
+
+    // Weight hint
+    var hintEl = document.getElementById('t-exercise-hint');
+    var data = localStorage.getItem('userData');
+    hintEl.textContent = data ? '' : t().exerciseHint;
+  }
 
   function t() { return I18N[currentLang]; }
 
@@ -478,6 +638,14 @@
     document.getElementById('t-fill-main').textContent = L.fillMain;
     document.getElementById('t-male').textContent = L.male;
     document.getElementById('t-female').textContent = L.female;
+    document.getElementById('t-exercise-title').textContent = L.exerciseTitle;
+    document.getElementById('t-intake-label').textContent = L.intakeLabel;
+    document.getElementById('t-burn-label').textContent = L.burnLabel;
+    document.getElementById('t-net-label').textContent = L.netLabel;
+    initExerciseDropdown();
+    var hintEl = document.getElementById('t-exercise-hint');
+    if (!localStorage.getItem('userData')) hintEl.textContent = L.exerciseHint;
+    updateExercise();
     updateSettingsBtn();
     document.querySelectorAll('[data-ph]').forEach(function(el) {
       el.placeholder = L.ph[el.getAttribute('data-ph')];
@@ -520,12 +688,29 @@
     var denom = parseFloat(localStorage.getItem('bmr')) || 2000;
     var pct = Math.min(intake / denom * 100, 100);
     document.getElementById('progressFill').style.width = pct + '%';
+    updateExercise();
+  }
+
+  function initExerciseDropdown() {
+    var sel = document.getElementById('exerciseType');
+    var prev = sel.value;
+    sel.innerHTML = '';
+    EXERCISES.forEach(function(ex, i) {
+      var opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = (currentLang === 'zh' ? ex.zh : ex.en) + ' — ' + ex.met + ' MET';
+      sel.appendChild(opt);
+    });
+    if (prev) sel.value = prev;
   }
 
   // ============ Input listeners ============
   ['protein', 'fat', 'carbs'].forEach(function(id) {
     document.getElementById(id).addEventListener('input', update);
   });
+
+  document.getElementById('exerciseType').addEventListener('change', updateExercise);
+  document.getElementById('exerciseDuration').addEventListener('input', updateExercise);
 
   ['protein', 'fat', 'carbs', 'kjInput', 'kcalInput'].forEach(function(id) {
     var el = document.getElementById(id);
@@ -576,8 +761,10 @@
 
   // ============ Food Panel ============
   var currentCategory = 'protein';
+  var searchQuery = '';
 
   function openFoodPanel() {
+    searchQuery = '';
     document.getElementById('foodOverlay').classList.add('show');
     renderFoodPanel();
   }
@@ -592,8 +779,38 @@
 
     var tabsHtml = '';
     CATEGORY_KEYS.forEach(function(cat) {
-      tabsHtml += '<button class="food-tab ' + (cat === currentCategory ? 'active' : '') + '" onclick="switchCategory(\'' + cat + '\')">' + catNames[cat] + '</button>';
+      tabsHtml += '<button class="food-tab ' + (cat === currentCategory && !searchQuery ? 'active' : '') + '" onclick="switchCategory(\'' + cat + '\')">' + catNames[cat] + '</button>';
     });
+
+    var searchHtml = '<div class="search-row"><input type="text" class="search-input" id="foodSearchInput" placeholder="' + L.searchPlaceholder + '" value="' + searchQuery.replace(/"/g, '&quot;') + '" oninput="onFoodSearch(this.value)"></div>';
+
+    if (searchQuery.trim()) {
+      var results = searchAllFoods(searchQuery.trim());
+      if (results.length === 0) {
+        body.innerHTML = tabsHtml + searchHtml + '<div class="no-results">' + L.noResults + ' <a onclick="goToAddCustom()">' + L.goAdd + '</a></div>';
+      } else {
+        var sItemsHtml = '';
+        results.forEach(function(r) {
+          var food = r.food;
+          var name = currentLang === 'zh' ? food.zh : food.en;
+          var macroStr = L.macroLabel + food.p + ' F' + food.f + ' C' + food.c;
+          var portionsHtml = '';
+          if (food.portions) {
+            food.portions.forEach(function(p) {
+              var pName = currentLang === 'zh' ? p.zh : p.en;
+              portionsHtml += '<button class="portion-btn" onclick="addSearchFood(' + r.catIdx + ',' + r.foodIdx + ',' + p.g + ')">' + pName + '</button>';
+            });
+          }
+          portionsHtml += '<input type="number" class="gram-input" id="search-gram-' + r.catIdx + '-' + r.foodIdx + '" placeholder="' + L.gramPlaceholder + '" min="0" step="1">';
+          portionsHtml += '<button class="gram-add" onclick="addSearchFoodByInput(' + r.catIdx + ',' + r.foodIdx + ')">' + L.add + '</button>';
+          sItemsHtml += '<div class="food-item"><div class="food-info"><div class="food-name">' + name + '</div><div class="food-macro">' + macroStr + '</div></div><div class="food-portions">' + portionsHtml + '</div></div>';
+        });
+        body.innerHTML = tabsHtml + searchHtml + '<div>' + sItemsHtml + '</div>';
+      }
+      var si = document.getElementById('foodSearchInput');
+      if (si) { si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
+      return;
+    }
 
     if (currentCategory === 'custom') {
       var formHtml = '<div class="custom-form">' +
@@ -619,7 +836,7 @@
         });
       }
       savedHtml += '</div>';
-      body.innerHTML = tabsHtml + formHtml + savedHtml;
+      body.innerHTML = tabsHtml + searchHtml + formHtml + savedHtml;
       return;
     }
 
@@ -641,10 +858,11 @@
       itemsHtml += '<div class="food-item"><div class="food-info"><div class="food-name">' + name + '</div><div class="food-macro">' + macroStr + '</div></div><div class="food-portions">' + portionsHtml + '</div></div>';
     });
 
-    body.innerHTML = tabsHtml + '<div>' + itemsHtml + '</div>';
+    body.innerHTML = tabsHtml + searchHtml + '<div>' + itemsHtml + '</div>';
   }
 
   function switchCategory(cat) {
+    searchQuery = '';
     currentCategory = cat;
     renderFoodPanel();
   }
@@ -671,6 +889,60 @@
       addFood(idx, g);
       input.value = '';
     }
+  }
+
+  function searchAllFoods(query) {
+    var q = query.toLowerCase();
+    var results = [];
+    CATEGORY_KEYS.forEach(function(cat, catIdx) {
+      if (cat === 'custom') return;
+      FOODS[cat].forEach(function(food, foodIdx) {
+        if (food.zh.toLowerCase().indexOf(q) !== -1 || food.en.toLowerCase().indexOf(q) !== -1) {
+          results.push({ catIdx: catIdx, catKey: cat, foodIdx: foodIdx, food: food });
+        }
+      });
+    });
+    return results;
+  }
+
+  function onFoodSearch(value) {
+    searchQuery = value;
+    renderFoodPanel();
+  }
+
+  function addSearchFood(catIdx, foodIdx, grams) {
+    var cat = CATEGORY_KEYS[catIdx];
+    var food = FOODS[cat][foodIdx];
+    var factor = grams / 100;
+    var item = {
+      name: currentLang === 'zh' ? food.zh : food.en,
+      grams: grams,
+      p: +(food.p * factor).toFixed(1),
+      f: +(food.f * factor).toFixed(1),
+      c: +(food.c * factor).toFixed(1),
+      kcal: +(food.p * factor * 4 + food.f * factor * 9 + food.c * factor * 4).toFixed(1)
+    };
+    accumulator.push(item);
+    renderAccumulator();
+  }
+
+  function addSearchFoodByInput(catIdx, foodIdx) {
+    var input = document.getElementById('search-gram-' + catIdx + '-' + foodIdx);
+    var g = parseFloat(input.value);
+    if (g > 0) {
+      addSearchFood(catIdx, foodIdx, g);
+      input.value = '';
+    }
+  }
+
+  function goToAddCustom() {
+    searchQuery = '';
+    currentCategory = 'custom';
+    renderFoodPanel();
+    setTimeout(function() {
+      var n = document.getElementById('customNameInput');
+      if (n) n.focus();
+    }, 50);
   }
 
   function addCustomFood(save) {

@@ -10,7 +10,9 @@ https://faye-ovo.github.io/calorie-counter/
 
 - **Instant Calculation** — Real-time calorie computation as you type
 - **40+ Food Presets** — Common fitness foods with realistic portion sizes (half palm, 1 bowl, 1 egg, etc.)
+- **Food Search** — Real-time search across all food categories (Chinese & English), with quick-add when no results
 - **Custom Foods** — Save your own foods for quick reuse, pin favorites to top
+- **Exercise Burn** — Compare intake vs. 15 common exercises (MET-based), with Pac-Man and lightning bolt icons
 - **BMR Tracking** — Set your gender/height/weight/age, see intake vs. daily needs progress bar
 - **Food Accumulator** — Add multiple foods in the panel, see total kcal before filling into the calculator
 - **kJ ↔ kcal Converter** — Built-in unit conversion, collapsed by default
@@ -37,6 +39,17 @@ Uses the Mifflin-St Jeor equation:
 - **Female**: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age - 161
 
 The progress bar fills based on intake / BMR ratio. Default reference: 2000 kcal.
+
+## Exercise Burn Calculation
+
+The exercise section uses MET (Metabolic Equivalent of Task) values to estimate calories burned:
+
+Calories = MET × weight(kg) × duration(h)
+
+- 15 exercises included (brisk walking, jogging, running, cycling, swimming, weight training, HIIT, etc.)
+- Weight is taken from personal settings (default: 65 kg)
+- Pac-Man icon mouth opens/closes based on intake ratio (open = low intake, closed = full)
+- Lightning bolt icon trembles when exercise type or duration changes
 
 ## Usage
 
