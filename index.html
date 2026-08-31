@@ -897,7 +897,8 @@
     CATEGORY_KEYS.forEach(function(cat, catIdx) {
       if (cat === 'custom') return;
       FOODS[cat].forEach(function(food, foodIdx) {
-        if (food.zh.toLowerCase().indexOf(q) !== -1 || food.en.toLowerCase().indexOf(q) !== -1) {
+        var name = (currentLang === 'zh' ? food.zh : food.en).toLowerCase();
+        if (name.indexOf(q) !== -1) {
           results.push({ catIdx: catIdx, catKey: cat, foodIdx: foodIdx, food: food });
         }
       });
