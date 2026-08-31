@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食物能量计算器 / Food Energy Calculator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FF6B35'/%3E%3Cstop offset='100%25' stop-color='%23FF4500'/%3E%3C/linearGradient%3E%3ClinearGradient id='f' x1='50%25' y1='0%25' x2='50%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FFD700'/%3E%3Cstop offset='50%25' stop-color='%23FFA500'/%3E%3Cstop offset='100%25' stop-color='%23FF6B35'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='56' height='56' rx='12' fill='url(%23g)'/%3E%3Cpath d='M32 12C32 12 20 22 20 34C20 44 26 52 32 52C38 52 44 44 44 34C44 29 40 27 38 24C38 30 35 31 35 27C35 22 37 16 32 12Z' fill='url(%23f)'/%3E%3Cpath d='M32 20C32 20 25 27 25 36C25 42 28 47 32 47C36 47 39 42 39 36C39 32 37 30 36 28C36 32 34 32 34 29C34 25 35 21 32 20Z' fill='%23FFF3B0' opacity='0.8'/%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #fff5eb 0%, #f0f7e9 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+
+  .topbar {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .topbar button {
+    padding: 6px 14px;
+    font-size: 13px;
+    border: 1.5px solid rgba(102,126,234,0.25);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.7);
+    color: #4a5568;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+
+  .topbar button:hover { background: #fff; border-color: #667eea; }
+
+  .lang-switch {
+    display: flex;
+    gap: 2px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 8px;
+    padding: 3px;
+    border: 1.5px solid rgba(102,126,234,0.15);
+  }
+
+  .lang-switch button {
+    padding: 4px 12px;
+    font-size: 13px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #a0aec0;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .lang-switch button.active { background: #fff; color: #667eea; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+  .container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  h1 { font-size: 24px; color: #2d3748; text-align: center; margin-bottom: 8px; }
+  .subtitle { font-size: 13px; color: #a0aec0; text-align: center; margin-bottom: 24px; }
+
+  .food-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+    border: 1.5px solid #ffe0b2;
+    border-radius: 10px;
+    color: #e65100;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .food-btn:hover { border-color: #ffb74d; box-shadow: 0 2px 8px rgba(255,152,0,0.15); }
+
+  .input-group { margin-bottom: 20px; }
+  .input-group label { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #4a5568; margin-bottom: 8px; }
+  .input-group .coeff { font-size: 12px; color: #a0aec0; }
+  .input-group input { width: 100%; padding: 12px 14px; font-size: 16px; border: 2px solid #e2e8f0; border-radius: 8px; transition: border-color 0.2s; color: #2d3748; }
+  .input-group input:focus { outline: none; border-color: #ffb74d; }
+  .input-group input::placeholder { color: #cbd5e0; }
+
+  .result { margin-top: 28px; padding: 24px; background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%); border-radius: 12px; text-align: center; }
+  .result-value { font-size: 42px; font-weight: 700; color: #e65100; line-height: 1.2; }
+  .result-unit { font-size: 14px; color: #a0aec0; margin-bottom: 14px; }
+
+  .progress-track { width: 100%; height: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; margin-bottom: 14px; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ffd89b 0%, #ff9800 70%, #e65100 100%); border-radius: 5px; transition: width 0.4s ease; }
+
+  .result-detail { display: flex; justify-content: space-around; font-size: 13px; color: #a0aec0; }
+  .result-detail b { color: #4a5568; }
+
+  .collapsible { margin-top: 20px; border: 1.5px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .collapsible-header { padding: 12px 16px; background: #f7fafc; cursor: pointer; font-size: 14px; font-weight: 600; color: #4a5568; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+  .collapsible-header:hover { background: #edf2f7; }
+  .collapsible-header .arrow { transition: transform 0.2s; }
+  .collapsible-header.open .arrow { transform: rotate(90deg); }
+  .collapsible-body { display: none; padding: 16px; }
+  .collapsible-body.show { display: block; }
+
+  .converter-row { display: flex; gap: 6px; align-items: center; }
+  .converter-row input { width: 0; flex: 1; min-width: 0; padding: 8px 8px; font-size: 13px; border: 2px solid #e2e8f0; border-radius: 6px; color: #2d3748; background: #fff; }
+  .converter-row input:focus { outline: none; border-color: #ffb74d; }
+  .converter-row input::placeholder { font-size: 12px; color: #cbd5e0; }
+  .converter-row .unit { font-size: 12px; color: #e65100; font-weight: 600; flex-shrink: 0; }
+  .converter-row .eq { font-size: 16px; color: #a0aec0; flex-shrink: 0; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 90%; max-width: 460px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { padding: 18px 20px; border-bottom: 1px solid #edf2f7; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h2 { font-size: 18px; color: #2d3748; }
+  .modal-close { background: none; border: none; font-size: 22px; color: #a0aec0; cursor: pointer; padding: 0 4px; }
+  .modal-close:hover { color: #2d3748; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+
+  /* Food panel */
+  .food-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .food-tab { padding: 5px 14px; font-size: 13px; border: 1.5px solid #e2e8f0; border-radius: 20px; background: #fff; color: #718096; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+  .food-tab.active { border-color: #ffb74d; background: #fff8e1; color: #e65100; }
+
+  .food-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f7fafc; }
+  .food-item:last-child { border-bottom: none; }
+  .food-info { flex: 1; }
+  .food-name { font-size: 14px; color: #2d3748; font-weight: 500; }
+  .food-macro { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+  .food-portions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .portion-btn { padding: 3px 10px; font-size: 12px; border: 1px solid #ffe0b2; border-radius: 6px; background: #fff8e1; color: #e65100; cursor: pointer; transition: all 0.15s; }
+  .portion-btn:hover { background: #ffe0b2; }
+  .gram-input { width: 60px; padding: 3px 6px; font-size: 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-align: center; }
+  .gram-add { padding: 3px 8px; font-size: 12px; border: none; border-radius: 6px; background: #ffb74d; color: #fff; cursor: pointer; font-weight: 600; }
+  .gram-add:hover { background: #ff9800; }
+
+  .accumulator { padding: 14px 20px; border-top: 1px solid #edf2f7; background: #fff8e1; }
+  .acc-total { font-size: 22px; font-weight: 700; color: #e65100; }
+  .acc-items { font-size: 12px; color: #a0aec0; margin-bottom: 8px; max-height: 60px; overflow-y: auto; }
+  .acc-item { display: inline-block; margin: 2px 4px; padding: 2px 8px; background: #fff; border-radius: 4px; font-size: 11px; }
+  .acc-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .acc-actions button { flex: 1; padding: 9px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-fill { background: #e65100; color: #fff; }
+  .btn-fill:hover { background: #d84315; }
+  .btn-clear { background: #f0f0f0; color: #718096; }
+  .btn-clear:hover { background: #e2e8f0; }
+
+  /* Settings */
+  .settings-row { margin-bottom: 16px; }
+  .settings-row label { display: block; font-size: 13px; color: #4a5568; margin-bottom: 6px; }
+  .settings-row input, .settings-row select { width: 100%; padding: 10px 12px; font-size: 15px; border: 2px solid #e2e8f0; border-radius: 8px; color: #2d3748; }
+  .settings-row input:focus, .settings-row select:focus { outline: none; border-color: #ffb74d; }
+  .settings-save { width: 100%; padding: 12px; margin-top: 8px; background: #e65100; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .settings-save:hover { background: #d84315; }
+  .settings-hint { font-size: 12px; color: #a0aec0; text-align: center; margin-top: 10px; }
+  .input-with-unit { position: relative; }
+  .input-with-unit input { padding-right: 36px; }
+  .unit-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #a0aec0; pointer-events: none; }
+  .custom-form { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+  .custom-form input { width: 100%; padding: 8px 12px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; color: #2d3748; }
+  .custom-form input:focus { outline: none; border-color: #ffb74d; }
+  .custom-add-btn { padding: 9px; background: #ffb74d; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+  .custom-add-btn:hover { background: #ff9800; }
+  .custom-btn-row { display: flex; gap: 8px; margin-top: 4px; }
+  .custom-btn-row button { flex: 1; padding: 9px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-temp { background: #f0f0f0; color: #718096; }
+  .btn-temp:hover { background: #e2e8f0; }
+  .btn-save { background: #ffb74d; color: #fff; }
+  .btn-save:hover { background: #ff9800; }
+  .saved-section { margin-top: 16px; border-top: 1px solid #edf2f7; padding-top: 12px; }
+  .saved-title { font-size: 13px; color: #a0aec0; margin-bottom: 8px; }
+  .saved-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+  .saved-item:hover { background: #fff8e1; }
+  .saved-item.pinned { background: #fff3e0; }
+  .saved-item-name { font-size: 14px; color: #2d3748; }
+  .saved-item-info { font-size: 12px; color: #a0aec0; }
+  .saved-item-kcal { font-size: 14px; font-weight: 600; color: #e65100; }
+  .saved-item-pin { font-size: 11px; color: #ff9800; }
+  .ctx-menu { display: none; position: fixed; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 300; overflow: hidden; min-width: 120px; }
+  .ctx-menu.show { display: block; }
+  .ctx-menu button { display: block; width: 100%; padding: 9px 16px; border: none; background: #fff; font-size: 13px; color: #4a5568; cursor: pointer; text-align: left; }
+  .ctx-menu button:hover { background: #f7fafc; }
+  .ctx-menu button:first-child { border-bottom: 1px solid #edf2f7; }
+  .toast { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: rgba(45,55,72,0.92); color: #fff; padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 600; z-index: 200; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; }
+  .toast.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <button id="settingsBtn" onclick="openSettings()">⚙️ 个人设置</button>
+    <div class="lang-switch">
+      <button id="langZh" class="active" onclick="switchLang('zh')">中文</button>
+      <button id="langEn" onclick="switchLang('en')">EN</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 id="t-title">食物能量计算器</h1>
+    <p class="subtitle" id="t-subtitle">输入营养成分含量（克），按 Atwater 系数计算</p>
+
+    <button class="food-btn" id="foodBtn" onclick="openFoodPanel()">📋 选择常见食物</button>
+
+    <div class="input-group">
+      <label><span id="t-protein">蛋白质</span><span class="coeff" id="t-coeff-p">系数 4 kcal/g</span></label>
+      <input type="number" id="protein" min="0" step="0.1" data-ph="protein">
+    </div>
+    <div class="input-group">
+      <label><span id="t-fat">脂肪</span><span class="coeff" id="t-coeff-f">系数 9 kcal/g</span></label>
+      <input type="number" id="fat" min="0" step="0.1" data-ph="fat">
+    </div>
+    <div class="input-group">
+      <label><span id="t-carbs">碳水化合物</span><span class="coeff" id="t-coeff-c">系数 4 kcal/g</span></label>
+      <input type="number" id="carbs" min="0" step="0.1" data-ph="carbs">
+    </div>
+
+    <div class="result">
+      <div class="result-value" id="totalKcal">0</div>
+      <div class="result-unit" id="t-unit-kcal">千卡 (kcal)</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="result-detail">
+        <span><span id="t-p-label">蛋白质</span> <b id="pKcal">0</b> kcal</span>
+        <span><span id="t-f-label">脂肪</span> <b id="fKcal">0</b> kcal</span>
+        <span><span id="t-c-label">碳水</span> <b id="cKcal">0</b> kcal</span>
+      </div>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" id="convHeader" onclick="toggleCollapsible('conv')">
+        <span id="t-converter-title">千焦 ↔ 千卡 换算</span>
+        <span class="arrow">▸</span>
+      </div>
+      <div class="collapsible-body" id="convBody">
+        <div class="converter-row">
+          <input type="number" id="kjInput" min="0" step="0.01" data-ph="kj">
+          <span class="unit">kJ</span>
+          <span class="eq">=</span>
+          <input type="number" id="kcalInput" min="0" step="0.01" data-ph="kcal">
+          <span class="unit">kcal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Food Panel Modal -->
+  <div class="modal-overlay" id="foodOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="t-food-panel-title">选择常见食物</h2>
+        <button class="modal-close" onclick="closeFoodPanel()">×</button>
+      </div>
+      <div class="modal-body" id="foodPanelBody"></div>
+      <div class="accumulator">
+        <div class="acc-items" id="accItems"></div>
+        <div class="acc-total"><span id="accTotal">0</span> kcal</div>
+        <div class="acc-actions">
+          <button class="btn-clear" id="t-clear-acc" onclick="clearAccumulator()">清空</button>
+          <button class="btn-fill" id="t-fill-main" onclick="fillToMain()">填入主计算器</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsOverlay">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h2 id="t-settings-title">个人设置</h2>
+        <button class="modal-close" onclick="closeSettings()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-row">
+          <label id="t-gender-label">性别</label>
+          <select id="setGender">
+            <option value="male" id="t-male">男</option>
+            <option value="female" id="t-female">女</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <label id="t-height-label">身高</label>
+          <div class="input-with-unit">
+            <input type="number" id="setHeight" min="100" max="250" placeholder="170">
+            <span class="unit-suffix">cm</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <label id="t-weight-label">体重</label>
+          <div class="input-with-unit">
+            <input type="number" id="setWeight" min="30" max="300" placeholder="65">
+            <span class="unit-suffix">kg</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <label id="t-age-label">年龄</label>
+          <input type="number" id="setAge" min="10" max="120" placeholder="25">
+        </div>
+        <button class="settings-save" id="t-save-settings" onclick="saveSettings()">保存</button>
+        <p class="settings-hint" id="t-settings-hint">数据仅保存在本地，用于计算基础代谢率 (BMR)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="ctx-menu" id="ctxMenu"></div>
+
+<script>
+  var P_COEFF = 4, F_COEFF = 9, C_COEFF = 4;
+  var KJ_PER_KCAL = 4.184;
+
+  // ============ Food Database ============
+  var FOODS = {
+    protein: [
+      { zh: '鸡胸肉', en: 'Chicken Breast', p: 31, f: 3.6, c: 0, portions: [{ zh: '半个巴掌1块(100g)', en: 'half palm (100g)', g: 100 }] },
+      { zh: '鸡蛋(熟)', en: 'Boiled Egg', p: 12.6, f: 10.6, c: 1.2, portions: [{ zh: '1个(50g)', en: '1 egg (50g)', g: 50 }] },
+      { zh: '蛋白(熟)', en: 'Egg White', p: 11, f: 0.2, c: 0.7, portions: [{ zh: '1个鸡蛋中的蛋白(30g)', en: '1 egg white (30g)', g: 30 }] },
+      { zh: '瘦牛肉', en: 'Lean Beef', p: 26, f: 5, c: 0, portions: [{ zh: '半个巴掌1块(100g)', en: 'half palm (100g)', g: 100 }] },
+      { zh: '鳕鱼', en: 'Cod', p: 18, f: 0.6, c: 0, portions: [{ zh: '手掌长1片(120g)', en: 'hand-length (120g)', g: 120 }] },
+      { zh: '三文鱼', en: 'Salmon', p: 20, f: 13, c: 0, portions: [{ zh: '半个巴掌1块(100g)', en: 'half palm (100g)', g: 100 }] },
+      { zh: '虾仁', en: 'Shrimp', p: 24, f: 0.3, c: 0.2, portions: [{ zh: '8-10只虾仁(100g)', en: '8-10 shrimp (100g)', g: 100 }] },
+      { zh: '金枪鱼罐头', en: 'Canned Tuna', p: 26, f: 1, c: 0, portions: [{ zh: '小罐1罐(100g)', en: 'small can (100g)', g: 100 }] },
+      { zh: '火鸡胸', en: 'Turkey Breast', p: 29, f: 1, c: 0, portions: [{ zh: '半个巴掌1块(100g)', en: 'half palm (100g)', g: 100 }] },
+      { zh: '豆腐', en: 'Tofu', p: 8, f: 4, c: 1.9, portions: [{ zh: '1块(150g)', en: '1 block (150g)', g: 150 }] },
+      { zh: '豆干', en: 'Dried Tofu', p: 17, f: 7, c: 4.2, portions: [{ zh: '名片大1片(60g)', en: 'card-sized (60g)', g: 60 }] },
+      { zh: '鹰嘴豆', en: 'Chickpeas', p: 9, f: 2.6, c: 27, portions: [{ zh: '1小碗(100g)', en: '1 small bowl (100g)', g: 100 }] },
+      { zh: '毛豆', en: 'Edamame', p: 11, f: 5, c: 12, portions: [{ zh: '1小碗(100g)', en: '1 small bowl (100g)', g: 100 }] },
+      { zh: '希腊酸奶', en: 'Greek Yogurt', p: 10, f: 0.4, c: 3.6, portions: [{ zh: '1杯(150g)', en: '1 cup (150g)', g: 150 }] },
+      { zh: '低脂奶酪', en: 'Cottage Cheese', p: 11, f: 2, c: 3.4, portions: [{ zh: '1小碗(100g)', en: '1 small bowl (100g)', g: 100 }] },
+      { zh: '牛奶', en: 'Milk', p: 3.4, f: 3.2, c: 4.8, portions: [{ zh: '1杯(250g)', en: '1 cup (250g)', g: 250 }] },
+      { zh: '猪里脊', en: 'Pork Tenderloin', p: 26, f: 3.5, c: 0, portions: [{ zh: '半个巴掌1块(100g)', en: 'half palm (100g)', g: 100 }] },
+      { zh: '鲈鱼', en: 'Sea Bass', p: 18, f: 3, c: 0, portions: [{ zh: '半条(200g)', en: 'half fish (200g)', g: 200 }] },
+      { zh: '鸡腿肉(去皮)', en: 'Chicken Thigh', p: 24, f: 5, c: 0, portions: [{ zh: '1个腿(120g)', en: '1 thigh (120g)', g: 120 }] },
+      { zh: '乳清蛋白粉', en: 'Whey Protein', p: 80, f: 5, c: 5, portions: null }
+    ],
+    carbs: [
+      { zh: '糙米(熟)', en: 'Brown Rice', p: 2.7, f: 0.9, c: 23, portions: [{ zh: '1碗(150g)', en: '1 bowl (150g)', g: 150 }] },
+      { zh: '燕麦', en: 'Oats', p: 13, f: 7, c: 67, portions: [{ zh: '4勺(40g)', en: '4 scoops (40g)', g: 40 }] },
+      { zh: '红薯', en: 'Sweet Potato', p: 1.6, f: 0.1, c: 20, portions: [{ zh: '1个(200g)', en: '1 piece (200g)', g: 200 }] },
+      { zh: '紫薯', en: 'Purple Yam', p: 1.4, f: 0.2, c: 18, portions: [{ zh: '1个(200g)', en: '1 piece (200g)', g: 200 }] },
+      { zh: '玉米', en: 'Corn', p: 4, f: 1.2, c: 22, portions: [{ zh: '1根(200g)', en: '1 cob (200g)', g: 200 }] },
+      { zh: '藜麦(熟)', en: 'Quinoa', p: 4.4, f: 1.9, c: 21, portions: [{ zh: '1碗(150g)', en: '1 bowl (150g)', g: 150 }] },
+      { zh: '全麦面包', en: 'Whole Wheat Bread', p: 13, f: 3.2, c: 41, portions: [{ zh: '1片(35g)', en: '1 slice (35g)', g: 35 }] },
+      { zh: '土豆', en: 'Potato', p: 2, f: 0.1, c: 17, portions: [{ zh: '拳头大1个(150g)', en: 'fist-sized (150g)', g: 150 }] },
+      { zh: '荞麦面', en: 'Buckwheat Noodles', p: 5, f: 1, c: 28, portions: [{ zh: '1碗(200g)', en: '1 bowl (200g)', g: 200 }] },
+      { zh: '山药', en: 'Yam', p: 1.5, f: 0.1, c: 12, portions: [{ zh: '1段(150g)', en: '1 piece (150g)', g: 150 }] },
+      { zh: '南瓜', en: 'Pumpkin', p: 0.7, f: 0.1, c: 5, portions: [{ zh: '拳头大1块(150g)', en: 'fist-sized (150g)', g: 150 }] },
+      { zh: '魔芋', en: 'Konjac', p: 0.1, f: 0, c: 3, portions: [{ zh: '1小包(250g)', en: '1 pack (250g)', g: 250 }] }
+    ],
+    vegetable: [
+      { zh: '西兰花', en: 'Broccoli', p: 2.8, f: 0.4, c: 3.6, portions: [{ zh: '3-4朵(100g)', en: '3-4 florets (100g)', g: 100 }] },
+      { zh: '菠菜', en: 'Spinach', p: 2.9, f: 0.3, c: 1.6, portions: [{ zh: '1小碗(100g)', en: '1 small bowl (100g)', g: 100 }] },
+      { zh: '芦笋', en: 'Asparagus', p: 1.9, f: 0.1, c: 2.3, portions: [{ zh: '3-4根(100g)', en: '3-4 spears (100g)', g: 100 }] },
+      { zh: '菜花', en: 'Cauliflower', p: 1.9, f: 0.2, c: 2, portions: [{ zh: '1小碗(100g)', en: '1 small bowl (100g)', g: 100 }] },
+      { zh: '黄瓜', en: 'Cucumber', p: 0.7, f: 0.1, c: 1.5, portions: [{ zh: '1根(200g)', en: '1 piece (200g)', g: 200 }] },
+      { zh: '蘑菇', en: 'Mushrooms', p: 2.2, f: 0.3, c: 2.5, portions: [{ zh: '1小碗(100g)', en: '1 small bowl (100g)', g: 100 }] }
+    ],
+    fruit: [
+      { zh: '苹果', en: 'Apple', p: 0.3, f: 0.1, c: 14, portions: [{ zh: '1个(200g)', en: '1 apple (200g)', g: 200 }] },
+      { zh: '香蕉', en: 'Banana', p: 1.1, f: 0.2, c: 22, portions: [{ zh: '1根(120g)', en: '1 banana (120g)', g: 120 }] }
+    ],
+    custom: []
+  };
+
+  var CATEGORY_KEYS = ['protein', 'carbs', 'vegetable', 'fruit', 'custom'];
+
+  var I18N = {
+    zh: {
+      title: '食物能量计算器',
+      subtitle: '输入营养成分含量（克），按 Atwater 系数计算',
+      protein: '蛋白质', fat: '脂肪', carbs: '碳水化合物',
+      coeffP: '系数 4 kcal/g', coeffF: '系数 9 kcal/g', coeffC: '系数 4 kcal/g',
+      unitKcal: '千卡 (kcal)',
+      pLabel: '蛋白质', fLabel: '脂肪', cLabel: '碳水',
+      converterTitle: '千焦 ↔ 千卡 换算',
+      foodBtn: '📋 选择常见食物',
+      foodPanelTitle: '选择常见食物',
+      settingsBtn: '⚙️ 个人设置',
+      settingsTitle: '个人设置',
+      settingsDone: '✓ 个人设置',
+      genderLabel: '性别', male: '男', female: '女',
+      heightLabel: '身高', weightLabel: '体重', ageLabel: '年龄',
+      catCustom: '自定义', customName: '名称（如：全麦饼干）', customPortion: '分量（如：1包）', customCal: '卡路里',
+      tempAdd: '仅本次', saveAdd: '存为常用',
+      ctxPin: '置顶', ctxUnpin: '取消置顶', ctxDelete: '删除',
+      noSaved: '暂无保存的食物', savedLabel: '已保存',
+      bmrLabel: 'BMR',
+      saveSettings: '保存',
+      toastSaved: '保存成功',
+      settingsHint: '数据仅保存在本地，用于计算基础代谢率 (BMR)',
+      clearAcc: '清空', fillMain: '填入主计算器',
+      catProtein: '高蛋白', catCarbs: '主食碳水', catVegetable: '蔬菜', catFruit: '水果',
+      macroLabel: '每100g · P', gramPlaceholder: '克数',
+      add: '添加',
+      ph: { protein: '输入蛋白质含量（克）', fat: '输入脂肪含量（克）', carbs: '输入碳水含量（克）', kj: '输入千焦 (kJ)', kcal: '输入千卡 (kcal)' }
+    },
+    en: {
+      title: 'Food Energy Calculator',
+      subtitle: 'Enter nutrient content (grams), calculated with Atwater factors',
+      protein: 'Protein', fat: 'Fat', carbs: 'Carbohydrate',
+      coeffP: '× 4 kcal/g', coeffF: '× 9 kcal/g', coeffC: '× 4 kcal/g',
+      unitKcal: 'kcal',
+      pLabel: 'Protein', fLabel: 'Fat', cLabel: 'Carbs',
+      converterTitle: 'kJ ↔ kcal Converter',
+      foodBtn: '📋 Select Food',
+      foodPanelTitle: 'Select Food',
+      settingsBtn: '⚙️ Settings',
+      settingsTitle: 'Settings',
+      settingsDone: '✓ Settings',
+      genderLabel: 'Gender', male: 'Male', female: 'Female',
+      heightLabel: 'Height', weightLabel: 'Weight', ageLabel: 'Age',
+      catCustom: 'Custom', customName: 'Name (e.g. Crackers)', customPortion: 'Portion (e.g. 1 pack)', customCal: 'Calories',
+      tempAdd: 'Temp', saveAdd: 'Save',
+      ctxPin: 'Pin', ctxUnpin: 'Unpin', ctxDelete: 'Delete',
+      noSaved: 'No saved foods yet', savedLabel: 'Saved',
+      bmrLabel: 'BMR',
+      saveSettings: 'Save',
+      toastSaved: 'Saved',
+      settingsHint: 'Data is stored locally to calculate Basal Metabolic Rate (BMR)',
+      clearAcc: 'Clear', fillMain: 'Fill to Calculator',
+      catProtein: 'Protein', catCarbs: 'Carbs', catVegetable: 'Vegetables', catFruit: 'Fruits',
+      macroLabel: 'per 100g · P', gramPlaceholder: 'grams',
+      add: 'Add',
+      ph: { protein: 'Enter protein (g)', fat: 'Enter fat (g)', carbs: 'Enter carbs (g)', kj: 'Enter kJ', kcal: 'Enter kcal' }
+    }
+  };
+
+  var currentLang = 'zh';
+  var accumulator = [];
+
+  function t() { return I18N[currentLang]; }
+
+  function switchLang(lang) {
+    currentLang = lang;
+    var L = I18N[lang];
+    document.getElementById('t-title').textContent = L.title;
+    document.getElementById('t-subtitle').textContent = L.subtitle;
+    document.getElementById('t-protein').textContent = L.protein;
+    document.getElementById('t-fat').textContent = L.fat;
+    document.getElementById('t-carbs').textContent = L.carbs;
+    document.getElementById('t-coeff-p').textContent = L.coeffP;
+    document.getElementById('t-coeff-f').textContent = L.coeffF;
+    document.getElementById('t-coeff-c').textContent = L.coeffC;
+    document.getElementById('t-unit-kcal').textContent = L.unitKcal;
+    document.getElementById('t-p-label').textContent = L.pLabel;
+    document.getElementById('t-f-label').textContent = L.fLabel;
+    document.getElementById('t-c-label').textContent = L.cLabel;
+    document.getElementById('t-converter-title').textContent = L.converterTitle;
+    document.getElementById('foodBtn').textContent = L.foodBtn;
+    document.getElementById('t-food-panel-title').textContent = L.foodPanelTitle;
+    document.getElementById('t-settings-title').textContent = L.settingsTitle;
+    document.getElementById('t-gender-label').textContent = L.genderLabel;
+    document.getElementById('t-male').textContent = L.male;
+    document.getElementById('t-female').textContent = L.female;
+    document.getElementById('t-height-label').textContent = L.heightLabel;
+    document.getElementById('t-weight-label').textContent = L.weightLabel;
+    document.getElementById('t-age-label').textContent = L.ageLabel;
+    document.getElementById('t-save-settings').textContent = L.saveSettings;
+    document.getElementById('t-settings-hint').textContent = L.settingsHint;
+    document.getElementById('t-clear-acc').textContent = L.clearAcc;
+    document.getElementById('t-fill-main').textContent = L.fillMain;
+    document.getElementById('t-male').textContent = L.male;
+    document.getElementById('t-female').textContent = L.female;
+    updateSettingsBtn();
+    document.querySelectorAll('[data-ph]').forEach(function(el) {
+      el.placeholder = L.ph[el.getAttribute('data-ph')];
+    });
+    document.getElementById('langZh').classList.toggle('active', lang === 'zh');
+    document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    renderFoodPanel();
+    renderAccumulator();
+  }
+
+  function updateSettingsBtn() {
+    var btn = document.getElementById('settingsBtn');
+    var bmr = localStorage.getItem('bmr');
+    if (bmr) {
+      btn.textContent = t().bmrLabel + ' ' + bmr + ' kcal';
+    } else {
+      btn.textContent = t().settingsBtn;
+    }
+  }
+
+  // ============ Core calc ============
+  function getVal(id) {
+    var v = document.getElementById(id).value;
+    return v === '' ? 0 : parseFloat(v);
+  }
+
+  function update() {
+    var p = getVal('protein'), f = getVal('fat'), c = getVal('carbs');
+    var pE = p * P_COEFF, fE = f * F_COEFF, cE = c * C_COEFF;
+    var total = pE + fE + cE;
+    document.getElementById('totalKcal').textContent = total.toFixed(1);
+    document.getElementById('pKcal').textContent = pE.toFixed(1);
+    document.getElementById('fKcal').textContent = fE.toFixed(1);
+    document.getElementById('cKcal').textContent = cE.toFixed(1);
+    updateProgress(total);
+  }
+
+  function updateProgress(intake) {
+    var denom = parseFloat(localStorage.getItem('bmr')) || 2000;
+    var pct = Math.min(intake / denom * 100, 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  // ============ Input listeners ============
+  ['protein', 'fat', 'carbs'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', update);
+  });
+
+  ['protein', 'fat', 'carbs', 'kjInput', 'kcalInput'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.addEventListener('mousedown', function() {
+      if (document.activeElement !== el && el.value !== '') {
+        el.value = '';
+        if (['protein', 'fat', 'carbs'].indexOf(id) !== -1) update();
+      }
+    });
+  });
+
+  ['protein', 'fat', 'carbs'].forEach(function(id, index, arr) {
+    var el = document.getElementById(id);
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        var next = arr[index + 1];
+        if (next) {
+          var nextEl = document.getElementById(next);
+          nextEl.value = '';
+          nextEl.focus();
+          update();
+        } else {
+          el.blur();
+        }
+      }
+    });
+  });
+
+  document.getElementById('kjInput').addEventListener('input', function() {
+    var kj = getVal('kjInput');
+    document.getElementById('kcalInput').value = kj > 0 ? (kj / KJ_PER_KCAL).toFixed(2) : '';
+  });
+  document.getElementById('kcalInput').addEventListener('input', function() {
+    var kcal = getVal('kcalInput');
+    document.getElementById('kjInput').value = kcal > 0 ? (kcal * KJ_PER_KCAL).toFixed(2) : '';
+  });
+
+  // ============ Collapsible ============
+  function toggleCollapsible(id) {
+    var header = document.getElementById(id + 'Header');
+    var body = document.getElementById(id + 'Body');
+    var isOpen = body.classList.contains('show');
+    body.classList.toggle('show');
+    header.classList.toggle('open');
+    header.querySelector('.arrow').textContent = isOpen ? '▸' : '▾';
+  }
+
+  // ============ Food Panel ============
+  var currentCategory = 'protein';
+
+  function openFoodPanel() {
+    document.getElementById('foodOverlay').classList.add('show');
+    renderFoodPanel();
+  }
+  function closeFoodPanel() {
+    document.getElementById('foodOverlay').classList.remove('show');
+  }
+
+  function renderFoodPanel() {
+    var body = document.getElementById('foodPanelBody');
+    var L = t();
+    var catNames = { protein: L.catProtein, carbs: L.catCarbs, vegetable: L.catVegetable, fruit: L.catFruit, custom: '+' + L.catCustom };
+
+    var tabsHtml = '';
+    CATEGORY_KEYS.forEach(function(cat) {
+      tabsHtml += '<button class="food-tab ' + (cat === currentCategory ? 'active' : '') + '" onclick="switchCategory(\'' + cat + '\')">' + catNames[cat] + '</button>';
+    });
+
+    if (currentCategory === 'custom') {
+      var formHtml = '<div class="custom-form">' +
+        '<input type="text" id="customNameInput" placeholder="' + L.customName + '" maxlength="20">' +
+        '<input type="text" id="customPortionInput" placeholder="' + L.customPortion + '" maxlength="20">' +
+        '<input type="number" id="customCalInput" placeholder="' + L.customCal + ' (kcal)" min="0" step="1">' +
+        '<div class="custom-btn-row">' +
+        '<button class="btn-temp" onclick="addCustomFood(false)">' + L.tempAdd + '</button>' +
+        '<button class="btn-save" onclick="addCustomFood(true)">' + L.saveAdd + '</button>' +
+        '</div></div>';
+      var saved = getSavedCustomFoods();
+      var pinned = saved.filter(function(f) { return f.pinned; }).sort(function(a, b) { return b.pinTime - a.pinTime; });
+      var unpinned = saved.filter(function(f) { return !f.pinned; });
+      var savedHtml = '<div class="saved-section"><div class="saved-title">' + L.savedLabel + ' (' + saved.length + ')</div>';
+      if (saved.length === 0) {
+        savedHtml += '<div class="food-macro">' + L.noSaved + '</div>';
+      } else {
+        pinned.concat(unpinned).forEach(function(f, i) {
+          var pinMark = f.pinned ? '<span class="saved-item-pin">📌</span>' : '';
+          savedHtml += '<div class="saved-item' + (f.pinned ? ' pinned' : '') + '" data-id="' + f.id + '" onclick="addSavedCustom(\'' + f.id + '\')" oncontextmenu="showCtxMenu(event,\'' + f.id + '\')">' +
+            '<div><div class="saved-item-name">' + pinMark + ' ' + f.name + '</div><div class="saved-item-info">' + (f.portion || '') + '</div></div>' +
+            '<div class="saved-item-kcal">' + f.kcal + ' kcal</div></div>';
+        });
+      }
+      savedHtml += '</div>';
+      body.innerHTML = tabsHtml + formHtml + savedHtml;
+      return;
+    }
+
+    var itemsHtml = '';
+    FOODS[currentCategory].forEach(function(food, idx) {
+      var name = currentLang === 'zh' ? food.zh : food.en;
+      var macroStr = L.macroLabel + food.p + ' F' + food.f + ' C' + food.c;
+
+      var portionsHtml = '';
+      if (food.portions) {
+        food.portions.forEach(function(p, pi) {
+          var pName = currentLang === 'zh' ? p.zh : p.en;
+          portionsHtml += '<button class="portion-btn" onclick="addFood(' + idx + ',' + p.g + ')">' + pName + '</button>';
+        });
+      }
+      portionsHtml += '<input type="number" class="gram-input" id="gram-' + idx + '" placeholder="' + L.gramPlaceholder + '" min="0" step="1">';
+      portionsHtml += '<button class="gram-add" onclick="addFoodByInput(' + idx + ')">' + L.add + '</button>';
+
+      itemsHtml += '<div class="food-item"><div class="food-info"><div class="food-name">' + name + '</div><div class="food-macro">' + macroStr + '</div></div><div class="food-portions">' + portionsHtml + '</div></div>';
+    });
+
+    body.innerHTML = tabsHtml + '<div>' + itemsHtml + '</div>';
+  }
+
+  function switchCategory(cat) {
+    currentCategory = cat;
+    renderFoodPanel();
+  }
+
+  function addFood(idx, grams) {
+    var food = FOODS[currentCategory][idx];
+    var factor = grams / 100;
+    var item = {
+      name: currentLang === 'zh' ? food.zh : food.en,
+      grams: grams,
+      p: +(food.p * factor).toFixed(1),
+      f: +(food.f * factor).toFixed(1),
+      c: +(food.c * factor).toFixed(1),
+      kcal: +(food.p * factor * 4 + food.f * factor * 9 + food.c * factor * 4).toFixed(1)
+    };
+    accumulator.push(item);
+    renderAccumulator();
+  }
+
+  function addFoodByInput(idx) {
+    var input = document.getElementById('gram-' + idx);
+    var g = parseFloat(input.value);
+    if (g > 0) {
+      addFood(idx, g);
+      input.value = '';
+    }
+  }
+
+  function addCustomFood(save) {
+    var name = document.getElementById('customNameInput').value.trim();
+    var portion = document.getElementById('customPortionInput').value.trim();
+    var cal = parseFloat(document.getElementById('customCalInput').value);
+    if (!name || !cal || cal <= 0) return;
+    var item = {
+      name: name, portion: portion || '', grams: 0,
+      p: 0, f: 0, c: 0, kcal: cal, custom: true
+    };
+    accumulator.push(item);
+    renderAccumulator();
+    if (save) {
+      var saved = getSavedCustomFoods();
+      saved.push({ id: 'c' + Date.now(), name: name, portion: portion || '', kcal: cal, pinned: false, pinTime: 0 });
+      localStorage.setItem('customFoods', JSON.stringify(saved));
+      renderFoodPanel();
+      showToast(t().toastSaved);
+    } else {
+      document.getElementById('customNameInput').value = '';
+      document.getElementById('customPortionInput').value = '';
+      document.getElementById('customCalInput').value = '';
+    }
+  }
+
+  function getSavedCustomFoods() {
+    try { return JSON.parse(localStorage.getItem('customFoods') || '[]'); }
+    catch(e) { return []; }
+  }
+
+  function addSavedCustom(id) {
+    var saved = getSavedCustomFoods();
+    var f = saved.find(function(s) { return s.id === id; });
+    if (!f) return;
+    accumulator.push({
+      name: f.name, portion: f.portion, grams: 0,
+      p: 0, f: 0, c: 0, kcal: f.kcal, custom: true
+    });
+    renderAccumulator();
+  }
+
+  function showCtxMenu(e, id) {
+    e.preventDefault();
+    e.stopPropagation();
+    var menu = document.getElementById('ctxMenu');
+    var saved = getSavedCustomFoods();
+    var f = saved.find(function(s) { return s.id === id; });
+    if (!f) return;
+    var pinLabel = f.pinned ? t().ctxUnpin : t().ctxPin;
+    menu.innerHTML = '<button onclick="togglePinCustom(\'' + id + '\')">' + pinLabel + '</button>' +
+      '<button onclick="deleteCustomFood(\'' + id + '\')">' + t().ctxDelete + '</button>';
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+    menu.classList.add('show');
+  }
+
+  function closeCtxMenu() { document.getElementById('ctxMenu').classList.remove('show'); }
+
+  function togglePinCustom(id) {
+    closeCtxMenu();
+    var saved = getSavedCustomFoods();
+    var f = saved.find(function(s) { return s.id === id; });
+    if (!f) return;
+    f.pinned = !f.pinned;
+    f.pinTime = f.pinned ? Date.now() : 0;
+    localStorage.setItem('customFoods', JSON.stringify(saved));
+    renderFoodPanel();
+  }
+
+  function deleteCustomFood(id) {
+    closeCtxMenu();
+    var saved = getSavedCustomFoods().filter(function(s) { return s.id !== id; });
+    localStorage.setItem('customFoods', JSON.stringify(saved));
+    renderFoodPanel();
+  }
+
+  function renderAccumulator() {
+    var itemsEl = document.getElementById('accItems');
+    var totalEl = document.getElementById('accTotal');
+    if (accumulator.length === 0) {
+      itemsEl.innerHTML = '';
+      totalEl.textContent = '0';
+      return;
+    }
+    var html = '';
+    var total = 0;
+    accumulator.forEach(function(item, i) {
+      var label = item.custom ? (item.name + (item.portion ? ' ' + item.portion : '')) : (item.name + ' ' + item.grams + 'g');
+      html += '<span class="acc-item">' + label + ' ×</span>';
+      total += item.kcal;
+    });
+    itemsEl.innerHTML = html;
+    totalEl.textContent = total.toFixed(1);
+  }
+
+  function clearAccumulator() {
+    accumulator = [];
+    renderAccumulator();
+  }
+
+  function fillToMain() {
+    if (accumulator.length === 0) return;
+    var sumP = 0, sumF = 0, sumC = 0;
+    accumulator.forEach(function(item) {
+      sumP += item.p;
+      sumF += item.f;
+      sumC += item.c;
+    });
+    var pEl = document.getElementById('protein');
+    var fEl = document.getElementById('fat');
+    var cEl = document.getElementById('carbs');
+    pEl.value = ((parseFloat(pEl.value) || 0) + sumP).toFixed(1);
+    fEl.value = ((parseFloat(fEl.value) || 0) + sumF).toFixed(1);
+    cEl.value = ((parseFloat(cEl.value) || 0) + sumC).toFixed(1);
+    update();
+    closeFoodPanel();
+  }
+
+  // ============ Settings ============
+  function openSettings() {
+    var s = localStorage.getItem('bmr');
+    if (s) {
+      var data = JSON.parse(localStorage.getItem('userData'));
+      if (data) {
+        document.getElementById('setGender').value = data.gender;
+        document.getElementById('setHeight').value = data.height;
+        document.getElementById('setWeight').value = data.weight;
+        document.getElementById('setAge').value = data.age;
+      }
+    }
+    document.getElementById('settingsOverlay').classList.add('show');
+  }
+  function closeSettings() {
+    document.getElementById('settingsOverlay').classList.remove('show');
+  }
+
+  function saveSettings() {
+    var gender = document.getElementById('setGender').value;
+    var height = parseFloat(document.getElementById('setHeight').value);
+    var weight = parseFloat(document.getElementById('setWeight').value);
+    var age = parseFloat(document.getElementById('setAge').value);
+    if (!height || !weight || !age) return;
+
+    var bmr;
+    if (gender === 'male') {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+    bmr = Math.round(bmr);
+    localStorage.setItem('bmr', bmr);
+    localStorage.setItem('userData', JSON.stringify({ gender: gender, height: height, weight: weight, age: age }));
+    closeSettings();
+    updateSettingsBtn();
+    update();
+    showToast(t().toastSaved);
+  }
+
+  function showToast(msg) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 2000);
+  }
+
+  // ============ Init ============
+  document.getElementById('foodOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeFoodPanel();
+  });
+  document.getElementById('settingsOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSettings();
+  });
+  document.addEventListener('click', function() { closeCtxMenu(); });
+
+  switchLang('zh');
+  updateSettingsBtn();
+  update();
+</script>
+</body>
+</html>
