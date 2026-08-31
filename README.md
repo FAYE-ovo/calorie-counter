@@ -10,8 +10,8 @@ https://faye-ovo.github.io/calorie-counter/
 
 - **Instant Calculation** — Real-time calorie computation as you type
 - **40+ Food Presets** — Common fitness foods with realistic portion sizes (half palm, 1 bowl, 1 egg, etc.)
-- **Food Search** — Real-time search across all food categories (Chinese & English), with quick-add when no results
-- **Custom Foods** — Save your own foods for quick reuse, pin favorites to top
+- **Food Search** — Real-time search within the current language (Chinese or English), with quick-add when no results found
+- **Custom Foods** — Save your own foods for quick reuse, pin favorites to top, right-click to manage
 - **Exercise Burn** — Compare intake vs. 15 common exercises (MET-based), with Pac-Man and lightning bolt icons
 - **BMR Tracking** — Set your gender/height/weight/age, see intake vs. daily needs progress bar
 - **Food Accumulator** — Add multiple foods in the panel, see total kcal before filling into the calculator
@@ -46,18 +46,22 @@ The exercise section uses MET (Metabolic Equivalent of Task) values to estimate 
 
 Calories = MET × weight(kg) × duration(h)
 
-- 15 exercises included (brisk walking, jogging, running, cycling, swimming, weight training, HIIT, etc.)
+- 15 exercises included (brisk walking, jogging, running, cycling, swimming, weight training, HIIT, jump rope, yoga, basketball, badminton, hiking, rowing, dancing, boxing)
 - Weight is taken from personal settings (default: 65 kg)
-- Pac-Man icon mouth opens/closes based on intake ratio (open = low intake, closed = full)
-- Lightning bolt icon trembles when exercise type or duration changes
+- Pac-Man icon: mouth opens wide at 0 intake, closes as intake approaches daily goal
+- Lightning bolt icon: trembles 3× when exercise type or duration changes
+- Intake and burn bars scale proportionally to the larger value; net calories shown below
 
 ## Usage
 
 1. Open `index.html` in any browser, or visit the live demo link above
 2. Enter protein, fat, and carbs in grams (use Enter key to jump between fields)
-3. Total calories update instantly
-4. Optional: Click "Select Common Foods" to pick from presets
-5. Optional: Click the gear icon to set personal BMR data
+3. Total calories update instantly with a progress bar showing intake vs. BMR
+4. **Food selection**: Click "Select Common Foods" to browse presets by category, or use the search bar to find foods instantly
+5. **Custom foods**: Switch to the Custom tab to add your own foods — save for reuse or add once
+6. **Personal settings**: Click the gear icon to set gender/height/weight/age for BMR calculation
+7. **Exercise comparison**: Expand "Exercise Burn" to select an exercise and duration, see intake vs. burn bars side by side
+8. **Unit conversion**: Expand the kJ ↔ kcal converter for quick energy unit conversion
 
 Works on desktop, mobile, and tablet — any device with a browser.
 
@@ -66,6 +70,29 @@ Works on desktop, mobile, and tablet — any device with a browser.
 - Pure HTML / CSS / JavaScript (no frameworks, no dependencies)
 - Single file, self-contained
 - SVG favicon (no image files needed)
+- localStorage for user settings and custom foods
+
+## Changelog
+
+### v1.2.0
+- Added exercise burn comparison with 15 MET-based exercises
+- Added Pac-Man (intake) and lightning bolt (burn) SVG icons
+- Added real-time food search within current language
+- No-results message with quick link to add custom food
+- Updated bilingual support for all new elements
+
+### v1.1.0
+- Added 40+ food presets with realistic portion sizes
+- Added custom food saving with pin/delete (right-click menu)
+- Added food accumulator panel for multi-food calculation
+- Added personal settings (gender/height/weight/age) with BMR calculation
+- Added bilingual support (Chinese / English)
+- Added kJ ↔ kcal converter
+- Click-to-clear input fields, Enter key navigation
+
+### v1.0.0
+- Initial release: food energy calculator with Atwater factors (4-9-4 kcal/g)
+- Instant calculation, progress bar, SVG favicon
 
 ## License
 
