@@ -212,6 +212,17 @@
   .exercise-row input:focus { outline: none; border-color: #ffb74d; }
   .exercise-row .min-label { font-size: 12px; color: #a0aec0; align-self: center; }
   .exercise-desc { font-size: 12px; color: #a0aec0; margin: -6px 2px 14px; line-height: 1.5; }
+  .exercise-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .ex-row { display: flex; gap: 6px; align-items: center; }
+  .ex-row select { flex: 1; padding: 8px 10px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; color: #2d3748; background: #fff; }
+  .ex-row select:focus { outline: none; border-color: #ffb74d; }
+  .ex-row input { width: 60px; padding: 8px 6px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; color: #2d3748; text-align: center; }
+  .ex-row input:focus { outline: none; border-color: #ffb74d; }
+  .ex-row .min-label { font-size: 12px; color: #a0aec0; }
+  .ex-del { width: 28px; height: 28px; border: none; border-radius: 50%; background: #fff0f0; color: #e53e3e; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .ex-del:hover { background: #fed7d7; }
+  .ex-add-btn { width: 100%; padding: 8px; margin-bottom: 14px; background: rgba(255,183,77,0.08); border: 1.5px dashed #ffe0b2; border-radius: 8px; color: #e65100; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .ex-add-btn:hover { border-color: #ffb74d; background: rgba(255,183,77,0.15); }
   .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .bar-icon { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .bar-label { font-size: 12px; color: #a0aec0; width: 36px; }
@@ -284,12 +295,8 @@
         <span class="arrow">▸</span>
       </div>
       <div class="collapsible-body" id="exBody">
-        <div class="exercise-row">
-          <select id="exerciseType"></select>
-          <input type="number" id="exerciseDuration" value="30" min="1" max="999">
-          <span class="min-label">min</span>
-        </div>
-        <div class="exercise-desc" id="exerciseDesc"></div>
+        <div class="exercise-list" id="exerciseList"></div>
+        <button class="ex-add-btn" id="exAddBtn" onclick="addExerciseRow()">+ 添加运动</button>
         <div class="bar-row">
           <span class="bar-label" id="t-intake-label">摄入</span>
           <div class="bar-icon" id="pacIcon">
@@ -481,7 +488,7 @@
       add: '添加',
       exerciseTitle: '运动消耗对比', intakeLabel: '摄入', burnLabel: '消耗', netLabel: '净额',
       searchPlaceholder: '搜索食物...', noResults: '啊哦，还没有呢，你来添加吧！', goAdd: '去添加',
-      exerciseHint: '💡 设置体重数据后计算更准确',
+      exerciseHint: '💡 设置体重数据后计算更准确', addExercise: '+ 添加运动',
       ph: { protein: '输入蛋白质含量（克）', fat: '输入脂肪含量（克）', carbs: '输入碳水含量（克）', kj: '输入千焦 (kJ)', kcal: '输入千卡 (kcal)' }
     },
     en: {
@@ -513,13 +520,14 @@
       add: 'Add',
       exerciseTitle: 'Exercise Burn', intakeLabel: 'Intake', burnLabel: 'Burn', netLabel: 'Net',
       searchPlaceholder: 'Search food...', noResults: 'No matches. Add your own!', goAdd: 'Add',
-      exerciseHint: '💡 Set weight in settings for accurate results',
+      exerciseHint: '💡 Set weight in settings for accurate results', addExercise: '+ Add Exercise',
       ph: { protein: 'Enter protein (g)', fat: 'Enter fat (g)', carbs: 'Enter carbs (g)', kj: 'Enter kJ', kcal: 'Enter kcal' }
     }
   };
 
   var currentLang = 'zh';
   var accumulator = [];
+  var exerciseRows = [{ type: 0, duration: 30 }];
 
   // ============ Exercise Database ============
   var EXERCISES = [
@@ -555,10 +563,13 @@
   }
 
   function getExerciseBurn() {
-    var ex = EXERCISES[parseInt(document.getElementById('exerciseType').value) || 0];
-    var dur = parseFloat(document.getElementById('exerciseDuration').value) || 0;
     var weight = getWeight();
-    return Math.round(ex.met * weight * (dur / 60));
+    var total = 0;
+    exerciseRows.forEach(function(row) {
+      var ex = EXERCISES[row.type || 0];
+      total += ex.met * weight * ((row.duration || 0) / 60);
+    });
+    return Math.round(total);
   }
 
   function pacPath(angleDeg) {
@@ -576,9 +587,6 @@
   }
 
   function updateExercise() {
-    var ex = EXERCISES[parseInt(document.getElementById('exerciseType').value) || 0];
-    document.getElementById('exerciseDesc').textContent = currentLang === 'zh' ? ex.desc_zh : ex.desc_en;
-
     var intake = parseFloat(document.getElementById('totalKcal').textContent) || 0;
     var burn = getExerciseBurn();
     var maxVal = Math.max(intake, burn, 1);
@@ -603,16 +611,19 @@
     if (pacAngle < 5) pacAngle = 0;
     document.getElementById('pacBody').setAttribute('d', pacPath(pacAngle));
 
-    // Bolt tremble
-    var bolt = document.getElementById('boltIcon');
-    bolt.classList.remove('bolt-tremble');
-    void bolt.offsetWidth;
-    bolt.classList.add('bolt-tremble');
-
     // Weight hint
     var hintEl = document.getElementById('t-exercise-hint');
     var data = localStorage.getItem('userData');
     hintEl.textContent = data ? '' : t().exerciseHint;
+  }
+
+  function onExerciseChange() {
+    updateExercise();
+    // Bolt tremble only on exercise change
+    var bolt = document.getElementById('boltIcon');
+    bolt.classList.remove('bolt-tremble');
+    void bolt.offsetWidth;
+    bolt.classList.add('bolt-tremble');
   }
 
   function t() { return I18N[currentLang]; }
@@ -652,7 +663,8 @@
     document.getElementById('t-intake-label').textContent = L.intakeLabel;
     document.getElementById('t-burn-label').textContent = L.burnLabel;
     document.getElementById('t-net-label').textContent = L.netLabel;
-    initExerciseDropdown();
+    initExerciseRows();
+    document.getElementById('exAddBtn').textContent = L.addExercise;
     var hintEl = document.getElementById('t-exercise-hint');
     if (!localStorage.getItem('userData')) hintEl.textContent = L.exerciseHint;
     updateExercise();
@@ -701,26 +713,74 @@
     updateExercise();
   }
 
-  function initExerciseDropdown() {
-    var sel = document.getElementById('exerciseType');
-    var prev = sel.value;
-    sel.innerHTML = '';
+  function initExerciseRows() {
+    var container = document.getElementById('exerciseList');
+    container.innerHTML = '';
+    exerciseRows.forEach(function(row, idx) {
+      container.appendChild(createExerciseRowElement(row, idx));
+    });
+  }
+
+  function createExerciseRowElement(row, idx) {
+    var div = document.createElement('div');
+    div.className = 'ex-row';
+
+    var select = document.createElement('select');
     EXERCISES.forEach(function(ex, i) {
       var opt = document.createElement('option');
       opt.value = i;
       opt.textContent = (currentLang === 'zh' ? ex.zh : ex.en) + ' — ' + ex.met + ' MET';
-      sel.appendChild(opt);
+      select.appendChild(opt);
     });
-    if (prev) sel.value = prev;
+    select.value = row.type;
+    select.addEventListener('change', function() {
+      exerciseRows[idx].type = parseInt(select.value);
+      onExerciseChange();
+    });
+
+    var input = document.createElement('input');
+    input.type = 'number';
+    input.value = row.duration;
+    input.min = 1;
+    input.max = 999;
+    input.addEventListener('input', function() {
+      exerciseRows[idx].duration = parseFloat(input.value) || 0;
+      onExerciseChange();
+    });
+
+    var minLabel = document.createElement('span');
+    minLabel.className = 'min-label';
+    minLabel.textContent = 'min';
+
+    div.appendChild(select);
+    div.appendChild(input);
+    div.appendChild(minLabel);
+
+    if (exerciseRows.length > 1) {
+      var delBtn = document.createElement('button');
+      delBtn.className = 'ex-del';
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', function() {
+        exerciseRows.splice(idx, 1);
+        initExerciseRows();
+        onExerciseChange();
+      });
+      div.appendChild(delBtn);
+    }
+
+    return div;
+  }
+
+  function addExerciseRow() {
+    exerciseRows.push({ type: 0, duration: 30 });
+    initExerciseRows();
+    onExerciseChange();
   }
 
   // ============ Input listeners ============
   ['protein', 'fat', 'carbs'].forEach(function(id) {
     document.getElementById(id).addEventListener('input', update);
   });
-
-  document.getElementById('exerciseType').addEventListener('change', updateExercise);
-  document.getElementById('exerciseDuration').addEventListener('input', updateExercise);
 
   ['protein', 'fat', 'carbs', 'kjInput', 'kcalInput'].forEach(function(id) {
     var el = document.getElementById(id);
