@@ -12,7 +12,7 @@ https://faye-ovo.github.io/calorie-counter/
 - **40+ Food Presets** — Common fitness foods with realistic portion sizes (half palm, 1 bowl, 1 egg, etc.)
 - **Food Search** — Real-time search within the current language (Chinese or English), with quick-add when no results found
 - **Custom Foods** — Save your own foods for quick reuse, pin favorites to top, right-click to manage
-- **Exercise Burn** — Compare intake vs. 15 common exercises (MET-based), with Pac-Man and lightning bolt icons
+- **Exercise Burn** — Compare intake vs. 20 common exercises (MET-based, strength training split into light/moderate/vigorous), with Pac-Man and lightning bolt icons
 - **BMR Tracking** — Set your gender/height/weight/age, see intake vs. daily needs progress bar
 - **Food Accumulator** — Add multiple foods in the panel, see total kcal before filling into the calculator
 - **kJ ↔ kcal Converter** — Built-in unit conversion, collapsed by default
@@ -46,7 +46,7 @@ The exercise section uses MET (Metabolic Equivalent of Task) values to estimate 
 
 Calories = MET × weight(kg) × duration(h)
 
-- 15 exercises included (brisk walking, jogging, running, cycling, swimming, weight training, HIIT, jump rope, yoga, basketball, badminton, hiking, rowing, dancing, boxing)
+- 20 exercises included: brisk walking, jogging, running, cycling, swimming (leisure & freestyle), weight training (light/moderate/vigorous), circuit training, HIIT (moderate/vigorous), jump rope, yoga, basketball, badminton, hiking, rowing, dancing, boxing
 - Weight is taken from personal settings (default: 65 kg)
 - Pac-Man icon: mouth opens wide at 0 intake, closes as intake approaches daily goal
 - Lightning bolt icon: trembles 3× when exercise type or duration changes
@@ -73,6 +73,11 @@ Works on desktop, mobile, and tablet — any device with a browser.
 - localStorage for user settings and custom foods
 
 ## Changelog
+
+### v1.2.1
+- Split exercise types: weight training → light/moderate/vigorous, HIIT → moderate/vigorous, swimming → leisure/freestyle
+- Added circuit training (MET 8.0)
+- Total exercises: 15 → 20
 
 ### v1.2.0
 - Added exercise burn comparison with 15 MET-based exercises
