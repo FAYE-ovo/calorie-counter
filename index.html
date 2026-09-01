@@ -107,7 +107,7 @@
   .result-unit { font-size: 14px; color: #a0aec0; margin-bottom: 14px; }
 
   .progress-track { width: 100%; height: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; margin-bottom: 14px; }
-  .progress-fill { height: 100%; width: 0%; background: #ffd89b; border-radius: 5px; transition: width 0.4s ease, background-color 0.4s ease; }
+  .progress-fill { height: 100%; width: 0%; border-radius: 5px; transition: width 0.4s ease, background 0.4s ease; }
 
   .result-detail { display: flex; justify-content: space-around; font-size: 13px; color: #a0aec0; }
   .result-detail b { color: #4a5568; }
@@ -223,6 +223,7 @@
   .ex-del:hover { background: #fed7d7; }
   .ex-add-btn { width: 100%; padding: 8px; margin-bottom: 14px; background: rgba(255,183,77,0.08); border: 1.5px dashed #ffe0b2; border-radius: 8px; color: #e65100; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .ex-add-btn:hover { border-color: #ffb74d; background: rgba(255,183,77,0.15); }
+  .met-hint { font-size: 11px; color: #bbb; margin: -8px 2px 14px; line-height: 1.4; }
   .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .bar-icon { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .bar-label { font-size: 12px; color: #a0aec0; width: 36px; }
@@ -297,6 +298,7 @@
       <div class="collapsible-body" id="exBody">
         <div class="exercise-list" id="exerciseList"></div>
         <button class="ex-add-btn" id="exAddBtn" onclick="addExerciseRow()">+ 添加运动</button>
+        <div class="met-hint" id="t-met-hint">MET = 运动强度指标 · 散步≈3 · 慢跑≈8 · 冲刺≈10</div>
         <div class="bar-row">
           <span class="bar-label" id="t-intake-label">摄入</span>
           <div class="bar-icon" id="pacIcon">
@@ -488,7 +490,7 @@
       add: '添加',
       exerciseTitle: '运动消耗对比', intakeLabel: '摄入', burnLabel: '消耗', netLabel: '净额',
       searchPlaceholder: '搜索食物...', noResults: '啊哦，还没有呢，你来添加吧！', goAdd: '去添加',
-      exerciseHint: '💡 设置体重数据后计算更准确', addExercise: '+ 添加运动',
+      exerciseHint: '💡 设置体重数据后计算更准确', addExercise: '+ 添加运动', metHint: 'MET = 运动强度指标 · 散步≈3 · 慢跑≈8 · 冲刺≈10',
       ph: { protein: '输入蛋白质含量（克）', fat: '输入脂肪含量（克）', carbs: '输入碳水含量（克）', kj: '输入千焦 (kJ)', kcal: '输入千卡 (kcal)' }
     },
     en: {
@@ -520,7 +522,7 @@
       add: 'Add',
       exerciseTitle: 'Exercise Burn', intakeLabel: 'Intake', burnLabel: 'Burn', netLabel: 'Net',
       searchPlaceholder: 'Search food...', noResults: 'No matches. Add your own!', goAdd: 'Add',
-      exerciseHint: '💡 Set weight in settings for accurate results', addExercise: '+ Add Exercise',
+      exerciseHint: '💡 Set weight in settings for accurate results', addExercise: '+ Add Exercise', metHint: 'MET = exercise intensity · walking≈3 · jogging≈8 · sprint≈10',
       ph: { protein: 'Enter protein (g)', fat: 'Enter fat (g)', carbs: 'Enter carbs (g)', kj: 'Enter kJ', kcal: 'Enter kcal' }
     }
   };
@@ -665,6 +667,7 @@
     document.getElementById('t-net-label').textContent = L.netLabel;
     initExerciseRows();
     document.getElementById('exAddBtn').textContent = L.addExercise;
+    document.getElementById('t-met-hint').textContent = L.metHint;
     var hintEl = document.getElementById('t-exercise-hint');
     if (!localStorage.getItem('userData')) hintEl.textContent = L.exerciseHint;
     updateExercise();
@@ -712,10 +715,12 @@
     var fill = document.getElementById('progressFill');
     fill.style.width = pct + '%';
     var t = Math.min(pct / 100, 1);
-    var h = 40 - t * 20;
-    var s = 90 + t * 5;
-    var l = 75 - t * 30;
-    fill.style.backgroundColor = 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
+    var h1 = 40 - t * 15, s1 = 85 + t * 10, l1 = 78 - t * 20;
+    var h2 = 35 - t * 15, s2 = 90 + t * 5, l2 = 65 - t * 25;
+    var trackWidth = fill.parentElement.offsetWidth;
+    fill.style.background = 'linear-gradient(90deg, hsl(' + h1 + ',' + s1 + '%,' + l1 + '%) 0%, hsl(' + h2 + ',' + s2 + '%,' + l2 + '%) 100%)';
+    fill.style.backgroundSize = trackWidth + 'px 100%';
+    fill.style.backgroundRepeat = 'no-repeat';
     updateExercise();
   }
 
@@ -1198,6 +1203,10 @@
   switchLang('zh');
   updateSettingsBtn();
   update();
+  window.addEventListener('resize', function() {
+    var intake = parseFloat(document.getElementById('totalKcal').textContent) || 0;
+    updateProgress(intake);
+  });
 </script>
 </body>
 </html>
