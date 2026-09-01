@@ -16,7 +16,7 @@ https://faye-ovo.github.io/calorie-counter/
 - **BMR Tracking** — Set your gender/height/weight/age, see intake vs. daily needs progress bar
 - **Food Accumulator** — Add multiple foods in the panel, see total kcal before filling into the calculator
 - **kJ ↔ kcal Converter** — Built-in unit conversion, collapsed by default
-- **Bilingual** — Chinese / English toggle, all labels and food names switch together
+- **Bilingual** — Chinese / English toggle, all labels, food names, exercise names, and descriptions switch together
 - **Privacy-First** — All data stored locally in your browser (localStorage), no server, no tracking, no account needed
 
 ## How It Works
