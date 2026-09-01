@@ -211,6 +211,7 @@
   .exercise-row input { width: 70px; padding: 8px 10px; font-size: 14px; border: 2px solid #e2e8f0; border-radius: 8px; color: #2d3748; text-align: center; }
   .exercise-row input:focus { outline: none; border-color: #ffb74d; }
   .exercise-row .min-label { font-size: 12px; color: #a0aec0; align-self: center; }
+  .exercise-desc { font-size: 12px; color: #a0aec0; margin: -6px 2px 14px; line-height: 1.5; }
   .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .bar-icon { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .bar-label { font-size: 12px; color: #a0aec0; width: 36px; }
@@ -288,6 +289,7 @@
           <input type="number" id="exerciseDuration" value="30" min="1" max="999">
           <span class="min-label">min</span>
         </div>
+        <div class="exercise-desc" id="exerciseDesc"></div>
         <div class="bar-row">
           <span class="bar-label" id="t-intake-label">摄入</span>
           <div class="bar-icon" id="pacIcon">
@@ -521,26 +523,26 @@
 
   // ============ Exercise Database ============
   var EXERCISES = [
-    { zh: '快走', en: 'Brisk Walking', met: 3.5 },
-    { zh: '慢跑(8km/h)', en: 'Jogging (5mph)', met: 8.3 },
-    { zh: '跑步(10km/h)', en: 'Running (6mph)', met: 9.8 },
-    { zh: '骑行(休闲)', en: 'Cycling (leisure)', met: 6.8 },
-    { zh: '游泳(休闲)', en: 'Swimming (leisure)', met: 5.3 },
-    { zh: '游泳(自由泳)', en: 'Swimming (freestyle)', met: 8.3 },
-    { zh: '力量训练(轻)', en: 'Weight Training (Light)', met: 3.5 },
-    { zh: '力量训练(中)', en: 'Weight Training (Moderate)', met: 5.0 },
-    { zh: '力量训练(高)', en: 'Weight Training (Vigorous)', met: 6.0 },
-    { zh: '循环训练', en: 'Circuit Training', met: 8.0 },
-    { zh: 'HIIT(中)', en: 'HIIT (Moderate)', met: 7.0 },
-    { zh: 'HIIT(高)', en: 'HIIT (Vigorous)', met: 9.0 },
-    { zh: '跳绳', en: 'Jump Rope', met: 10.0 },
-    { zh: '瑜伽', en: 'Yoga', met: 3.0 },
-    { zh: '篮球', en: 'Basketball', met: 6.0 },
-    { zh: '羽毛球', en: 'Badminton', met: 5.5 },
-    { zh: '徒步', en: 'Hiking', met: 6.0 },
-    { zh: '划船机', en: 'Rowing', met: 7.0 },
-    { zh: '舞蹈', en: 'Dancing', met: 4.8 },
-    { zh: '拳击训练', en: 'Boxing', met: 7.8 }
+    { zh: '快走', en: 'Brisk Walking', met: 3.5, desc_zh: '约 5-6km/h，能说话但不能唱歌的速度', desc_en: '~5-6 km/h, brisk pace where you can talk but not sing' },
+    { zh: '慢跑(8km/h)', en: 'Jogging (5mph)', met: 8.3, desc_zh: '轻松跑步节奏，可以边跑边交谈', desc_en: 'Easy jogging pace, conversational breathing' },
+    { zh: '跑步(10km/h)', en: 'Running (6mph)', met: 9.8, desc_zh: '中等强度跑步，呼吸明显加快', desc_en: 'Moderate running, noticeably faster breathing' },
+    { zh: '骑行(休闲)', en: 'Cycling (leisure)', met: 6.8, desc_zh: '平路休闲骑行，约 15-20km/h', desc_en: 'Casual cycling on flat terrain, ~15-20 km/h' },
+    { zh: '游泳(休闲)', en: 'Swimming (leisure)', met: 5.3, desc_zh: '蛙泳/仰泳慢速游，以放松为主', desc_en: 'Slow breaststroke/backstroke, relaxed pace' },
+    { zh: '游泳(自由泳)', en: 'Swimming (freestyle)', met: 8.3, desc_zh: '中快速自由泳，持续划水', desc_en: 'Moderate-fast freestyle, continuous laps' },
+    { zh: '力量训练(轻)', en: 'Weight Training (Light)', met: 3.5, desc_zh: '轻重量、多次数，热身或恢复为主', desc_en: 'Light weights, high reps — warm-up or recovery' },
+    { zh: '力量训练(中)', en: 'Weight Training (Moderate)', met: 5.0, desc_zh: '中等重量，常规组间休息，典型增肌训练', desc_en: 'Moderate weights with rest — typical hypertrophy' },
+    { zh: '力量训练(高)', en: 'Weight Training (Vigorous)', met: 6.0, desc_zh: '大重量、高强度，组间心率维持较高', desc_en: 'Heavy weights, high intensity — elevated heart rate between sets' },
+    { zh: '循环训练', en: 'Circuit Training', met: 8.0, desc_zh: '多动作连续循环，休息短，兼顾力量与心肺', desc_en: 'Multiple exercises in rotation with short rest — combines strength and cardio' },
+    { zh: 'HIIT(中)', en: 'HIIT (Moderate)', met: 7.0, desc_zh: '中等强度间歇，如 30秒冲 + 30秒休', desc_en: 'Moderate intervals, e.g. 30s on / 30s off' },
+    { zh: 'HIIT(高)', en: 'HIIT (Vigorous)', met: 9.0, desc_zh: '全力冲刺间歇，如 Tabata 20秒冲 + 10秒休', desc_en: 'All-out sprints, e.g. Tabata 20s on / 10s off' },
+    { zh: '跳绳', en: 'Jump Rope', met: 10.0, desc_zh: '中速跳绳，约每分钟 100-120 次', desc_en: 'Moderate pace, ~100-120 skips per minute' },
+    { zh: '瑜伽', en: 'Yoga', met: 3.0, desc_zh: '哈他瑜伽/流瑜伽，以拉伸和呼吸为主', desc_en: 'Hatha/Vinyasa yoga — stretching and breathing' },
+    { zh: '篮球', en: 'Basketball', met: 6.0, desc_zh: '半场/全场休闲对抗', desc_en: 'Recreational game, half or full court' },
+    { zh: '羽毛球', en: 'Badminton', met: 5.5, desc_zh: '休闲双打或中等强度单打', desc_en: 'Recreational doubles or moderate singles' },
+    { zh: '徒步', en: 'Hiking', met: 6.0, desc_zh: '带轻微坡度的山野徒步', desc_en: 'Cross-country hiking with mild elevation' },
+    { zh: '划船机', en: 'Rowing', met: 7.0, desc_zh: '中等强度划船机训练', desc_en: 'Moderate effort on rowing machine' },
+    { zh: '舞蹈', en: 'Dancing', met: 4.8, desc_zh: '有氧舞蹈/尊巴等中等强度舞蹈', desc_en: 'Aerobic dance / Zumba, moderate intensity' },
+    { zh: '拳击训练', en: 'Boxing', met: 7.8, desc_zh: '打沙袋/拳击操，包含出拳和移动', desc_en: 'Punching bag / boxing cardio with footwork' }
   ];
 
   function getWeight() {
@@ -574,6 +576,9 @@
   }
 
   function updateExercise() {
+    var ex = EXERCISES[parseInt(document.getElementById('exerciseType').value) || 0];
+    document.getElementById('exerciseDesc').textContent = currentLang === 'zh' ? ex.desc_zh : ex.desc_en;
+
     var intake = parseFloat(document.getElementById('totalKcal').textContent) || 0;
     var burn = getExerciseBurn();
     var maxVal = Math.max(intake, burn, 1);
