@@ -75,47 +75,6 @@ Works on desktop, mobile, and tablet — any device with a browser.
 - SVG favicon (no image files needed)
 - localStorage for user settings and custom foods
 
-## Changelog
-
-### v1.4.0
-- MET hint line below exercise list (bilingual): "MET = exercise intensity · walking≈3 · jogging≈8 · sprint≈10"
-- Exercise descriptions on hover: tooltip shows brief explanation when hovering any exercise dropdown
-- Pac-Man chomp animation: mouth closes then opens to target angle (300ms) when intake changes
-- Dynamic gradient progress bar: gradient spans full track width, colors shift from light amber to deep brown based on intake/BMR ratio
-- Resize listener to recalculate gradient width on window resize
-
-### v1.3.0
-- Multi-exercise accumulator: add multiple exercises, total burn = sum of all rows
-- Each row has independent exercise type + duration + delete button
-- Bolt tremble only triggers on exercise change, not on intake change
-- Bilingual support for add button and all exercise rows
-
-### v1.2.1
-- Split exercise types: weight training → light/moderate/vigorous, HIIT → moderate/vigorous, swimming → leisure/freestyle
-- Added circuit training (MET 8.0)
-- Added exercise descriptions for all 20 exercises (bilingual)
-- Total exercises: 15 → 20
-
-### v1.2.0
-- Added exercise burn comparison with 15 MET-based exercises
-- Added Pac-Man (intake) and lightning bolt (burn) SVG icons
-- Added real-time food search within current language
-- No-results message with quick link to add custom food
-- Updated bilingual support for all new elements
-
-### v1.1.0
-- Added 40+ food presets with realistic portion sizes
-- Added custom food saving with pin/delete (right-click menu)
-- Added food accumulator panel for multi-food calculation
-- Added personal settings (gender/height/weight/age) with BMR calculation
-- Added bilingual support (Chinese / English)
-- Added kJ ↔ kcal converter
-- Click-to-clear input fields, Enter key navigation
-
-### v1.0.0
-- Initial release: food energy calculator with Atwater factors (4-9-4 kcal/g)
-- Instant calculation, progress bar, SVG favicon
-
 ## License
 
 MIT
