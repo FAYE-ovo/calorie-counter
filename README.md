@@ -12,8 +12,8 @@ https://faye-ovo.github.io/calorie-counter/
 - **40+ Food Presets** — Common fitness foods with realistic portion sizes (half palm, 1 bowl, 1 egg, etc.)
 - **Food Search** — Real-time search within the current language (Chinese or English), with quick-add when no results found
 - **Custom Foods** — Save your own foods for quick reuse, pin favorites to top, right-click to manage
-- **Exercise Burn** — Compare intake vs. 20 exercises (MET-based, strength training split into light/moderate/vigorous), multi-row accumulator for combined workouts, with Pac-Man and lightning bolt icons
-- **BMR Tracking** — Set your gender/height/weight/age, see intake vs. daily needs progress bar
+- **Exercise Burn** — Compare intake vs. 20 exercises (MET-based, strength training split into light/moderate/vigorous), multi-row accumulator for combined workouts, exercise descriptions on hover, MET hint, with Pac-Man chomp and lightning bolt icons
+- **BMR Tracking** — Set your gender/height/weight/age, see intake vs. daily needs progress bar with dynamic gradient (light at low intake, deep at goal)
 - **Food Accumulator** — Add multiple foods in the panel, see total kcal before filling into the calculator
 - **kJ ↔ kcal Converter** — Built-in unit conversion, collapsed by default
 - **Bilingual** — Chinese / English toggle, all labels, food names, exercise names, and descriptions switch together
@@ -38,7 +38,7 @@ Uses the Mifflin-St Jeor equation:
 - **Male**: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age + 5
 - **Female**: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age - 161
 
-The progress bar fills based on intake / BMR ratio. Default reference: 2000 kcal.
+The progress bar fills based on intake / BMR ratio with a dynamic gradient: colors shift from light amber (low intake) to deep warm brown (approaching goal). The gradient spans the full track width, so only the light portion is visible at low fill. Default reference: 2000 kcal.
 
 ## Exercise Burn Calculation
 
@@ -48,8 +48,10 @@ Calories = MET × weight(kg) × duration(h)
 
 - 20 exercises included: brisk walking, jogging, running, cycling, swimming (leisure & freestyle), weight training (light/moderate/vigorous), circuit training, HIIT (moderate/vigorous), jump rope, yoga, basketball, badminton, hiking, rowing, dancing, boxing
 - Weight is taken from personal settings (default: 65 kg)
-- Pac-Man icon: mouth opens wide at 0 intake, closes as intake approaches daily goal
+- Pac-Man icon: mouth opens wide at 0 intake, closes as intake approaches daily goal. Chomp animation (close → open) plays when intake value changes
 - Lightning bolt icon: trembles 3× when exercise type or duration changes (not on intake change)
+- Exercise descriptions: hover any exercise dropdown to see a brief explanation (bilingual)
+- MET hint line below exercise list: "MET = exercise intensity · walking≈3 · jogging≈8 · sprint≈10"
 - Multi-row accumulator: add multiple exercises, total burn = sum of all rows
 - Intake and burn bars scale proportionally to the larger value; net calories shown below
 
@@ -74,6 +76,13 @@ Works on desktop, mobile, and tablet — any device with a browser.
 - localStorage for user settings and custom foods
 
 ## Changelog
+
+### v1.4.0
+- MET hint line below exercise list (bilingual): "MET = exercise intensity · walking≈3 · jogging≈8 · sprint≈10"
+- Exercise descriptions on hover: tooltip shows brief explanation when hovering any exercise dropdown
+- Pac-Man chomp animation: mouth closes then opens to target angle (300ms) when intake changes
+- Dynamic gradient progress bar: gradient spans full track width, colors shift from light amber to deep brown based on intake/BMR ratio
+- Resize listener to recalculate gradient width on window resize
 
 ### v1.3.0
 - Multi-exercise accumulator: add multiple exercises, total burn = sum of all rows
