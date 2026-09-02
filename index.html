@@ -223,6 +223,8 @@
   .ex-del:hover { background: #fed7d7; }
   .ex-add-btn { width: 100%; padding: 8px; margin-bottom: 14px; background: rgba(255,183,77,0.08); border: 1.5px dashed #ffe0b2; border-radius: 8px; color: #e65100; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .ex-add-btn:hover { border-color: #ffb74d; background: rgba(255,183,77,0.15); }
+  .ex-tooltip { position: absolute; z-index: 20; background: rgba(45,55,72,0.92); color: #fff; font-size: 12px; padding: 6px 10px; border-radius: 6px; pointer-events: none; opacity: 0; transition: opacity 0.15s; max-width: 300px; line-height: 1.4; }
+  .ex-tooltip.show { opacity: 1; }
   .met-hint { font-size: 11px; color: #bbb; margin: -8px 2px 14px; line-height: 1.4; }
   .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .bar-icon { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
@@ -295,10 +297,11 @@
         <span id="t-exercise-title">运动消耗对比</span>
         <span class="arrow">▸</span>
       </div>
-      <div class="collapsible-body" id="exBody">
+      <div class="collapsible-body" id="exBody" style="position:relative">
         <div class="exercise-list" id="exerciseList"></div>
         <button class="ex-add-btn" id="exAddBtn" onclick="addExerciseRow()">+ 添加运动</button>
         <div class="met-hint" id="t-met-hint">MET = 运动强度指标 · 散步≈3 · 慢跑≈8 · 冲刺≈10</div>
+        <div class="ex-tooltip" id="exTooltip"></div>
         <div class="bar-row">
           <span class="bar-label" id="t-intake-label">摄入</span>
           <div class="bar-icon" id="pacIcon">
@@ -574,6 +577,10 @@
     return Math.round(total);
   }
 
+  var pacCurrentAngle = 160;
+  var pacTargetAngle = 160;
+  var pacAnimating = false;
+
   function pacPath(angleDeg) {
     var angle = Math.min(Math.max(angleDeg, 0), 160);
     var halfRad = (angle / 2) * Math.PI / 180;
@@ -588,9 +595,40 @@
     return 'M ' + cx + ',' + cy + ' L ' + tx.toFixed(2) + ',' + ty.toFixed(2) + ' A ' + r + ',' + r + ' 0 1 0 ' + bx.toFixed(2) + ',' + by.toFixed(2) + ' Z';
   }
 
+  function chompPac() {
+    if (pacAnimating) return;
+    pacAnimating = true;
+    var startAngle = pacCurrentAngle;
+    var startTime = performance.now();
+    var duration = 300;
+    function step(now) {
+      var elapsed = now - startTime;
+      var target = pacTargetAngle;
+      if (elapsed >= duration) {
+        pacCurrentAngle = target;
+        document.getElementById('pacBody').setAttribute('d', pacPath(target));
+        pacAnimating = false;
+        return;
+      }
+      var t = elapsed / duration;
+      if (t < 0.5) {
+        pacCurrentAngle = startAngle * (1 - t * 2);
+      } else {
+        pacCurrentAngle = target * ((t - 0.5) * 2);
+      }
+      document.getElementById('pacBody').setAttribute('d', pacPath(pacCurrentAngle));
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  var prevIntake = 0;
+
   function updateExercise() {
     var intake = parseFloat(document.getElementById('totalKcal').textContent) || 0;
     var burn = getExerciseBurn();
+    var intakeChanged = intake !== prevIntake;
+    prevIntake = intake;
     var maxVal = Math.max(intake, burn, 1);
     var intakePct = (intake / maxVal) * 100;
     var burnPct = (burn / maxVal) * 100;
@@ -609,9 +647,17 @@
     // Pac-Man: 0 intake = 160° (wide open), max = 0° (closed)
     var denom = parseFloat(localStorage.getItem('bmr')) || 2000;
     var ratio = Math.min(intake / denom, 1);
-    var pacAngle = (1 - ratio) * 160;
-    if (pacAngle < 5) pacAngle = 0;
-    document.getElementById('pacBody').setAttribute('d', pacPath(pacAngle));
+    var newAngle = (1 - ratio) * 160;
+    if (newAngle < 5) newAngle = 0;
+
+    if (intakeChanged && newAngle !== pacTargetAngle) {
+      pacTargetAngle = newAngle;
+      chompPac();
+    } else if (!pacAnimating) {
+      pacTargetAngle = newAngle;
+      pacCurrentAngle = newAngle;
+      document.getElementById('pacBody').setAttribute('d', pacPath(newAngle));
+    }
 
     // Weight hint
     var hintEl = document.getElementById('t-exercise-hint');
@@ -747,6 +793,20 @@
     select.addEventListener('change', function() {
       exerciseRows[idx].type = parseInt(select.value);
       onExerciseChange();
+    });
+    select.addEventListener('mouseenter', function() {
+      var ex = EXERCISES[parseInt(select.value)];
+      var desc = currentLang === 'zh' ? ex.desc_zh : ex.desc_en;
+      var tip = document.getElementById('exTooltip');
+      tip.textContent = desc;
+      var rect = select.getBoundingClientRect();
+      var parentRect = document.getElementById('exBody').getBoundingClientRect();
+      tip.style.left = (rect.left - parentRect.left) + 'px';
+      tip.style.top = (rect.bottom - parentRect.top + 4) + 'px';
+      tip.classList.add('show');
+    });
+    select.addEventListener('mouseleave', function() {
+      document.getElementById('exTooltip').classList.remove('show');
     });
 
     var input = document.createElement('input');
